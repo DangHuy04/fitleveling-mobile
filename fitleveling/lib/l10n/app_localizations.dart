@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:intl/intl.dart';
 import 'app_localizations_en.dart';
 import 'app_localizations_vi.dart';
 
@@ -36,6 +34,11 @@ class AppLocalizations {
   String get password => _localizedStrings['password'] ?? 'Password';
   String get dontHaveAccount =>
       _localizedStrings['dontHaveAccount'] ?? "Don't have an account? Sign up";
+
+  // Thêm các thông báo lỗi
+  String get emptyFields => _localizedStrings['empty_fields'] ?? 'Fields cannot be empty';
+  String get invalidEmail => _localizedStrings['invalid_email'] ?? 'Invalid email format';
+  String get shortPassword => _localizedStrings['short_password'] ?? 'Password must be at least 8 characters';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
