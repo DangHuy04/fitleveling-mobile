@@ -34,7 +34,7 @@ class LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}").hasMatch(email)) {
+    if (!RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email)) {
       showErrorDialog(t.invalidEmail);
       return;
     }
@@ -157,6 +157,7 @@ class LoginScreenState extends State<LoginScreen> {
                         children: [
                           // Ô nhập Email
                           TextField(
+                            controller: emailController,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
                             decoration: InputDecoration(
@@ -179,6 +180,7 @@ class LoginScreenState extends State<LoginScreen> {
 
                           // Ô nhập Password
                           TextField(
+                            controller: passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               hintText: t.password,
@@ -214,7 +216,7 @@ class LoginScreenState extends State<LoginScreen> {
                               shadowColor: Colors.orangeAccent,
                               elevation: 8,
                             ),
-                            onPressed: () {},
+                            onPressed: validateAndSubmit,
                             child: Text(
                               t.login,
                               style: const TextStyle(

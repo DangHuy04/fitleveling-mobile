@@ -36,9 +36,9 @@ class AppLocalizations {
       _localizedStrings['dontHaveAccount'] ?? "Don't have an account? Sign up";
 
   // Thêm các thông báo lỗi
-  String get emptyFields => _localizedStrings['empty_fields'] ?? 'Fields cannot be empty';
-  String get invalidEmail => _localizedStrings['invalid_email'] ?? 'Invalid email format';
-  String get shortPassword => _localizedStrings['short_password'] ?? 'Password must be at least 8 characters';
+  String get emptyFields => _localizedStrings['emptyFields'] ?? 'Fields cannot be empty';
+  String get invalidEmail => _localizedStrings['invalidEmail'] ?? 'Invalid email format';
+  String get shortPassword => _localizedStrings['shortPassword'] ?? 'Password must be at least 8 characters';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
