@@ -32,6 +32,10 @@ class AppLocalizations {
 
   String get login => _localizedStrings['login'] ?? 'Login';
   String get signUp => _localizedStrings['signUp'] ?? 'Sign Up';
+  String get email => _localizedStrings['email'] ?? 'Email';
+  String get password => _localizedStrings['password'] ?? 'Password';
+  String get dontHaveAccount =>
+      _localizedStrings['dontHaveAccount'] ?? "Don't have an account? Sign up";
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
