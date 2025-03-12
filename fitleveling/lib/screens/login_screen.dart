@@ -39,7 +39,6 @@ class LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Sửa regex pattern cho đúng (bỏ dấu \\ thừa)
     if (!RegExp(
       r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
     ).hasMatch(email)) {
@@ -56,7 +55,6 @@ class LoginScreenState extends State<LoginScreen> {
 
     try {
       await Future.delayed(const Duration(seconds: 2));
-      // TODO: Thực hiện API đăng nhập thực tế
       // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
     } catch (e) {
       showErrorDialog("Đăng nhập thất bại: ${e.toString()}");
@@ -69,10 +67,11 @@ class LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final AppLocalizations? t = AppLocalizations.of(context);
         return AlertDialog(
-          title: const Text(
-            "Lỗi",
-            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+          title: Text(
+            t?.error ?? 'Error !',
+            style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
           content: Text(message),
           actions: [
@@ -145,7 +144,7 @@ class LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 30),
                     Image.asset('assets/logo.png', height: 150),
                     const SizedBox(height: 15),
-                    // Thay thế t.welcomeMessage bằng chuỗi cứng
+              
                     const Text(
                       "Welcome to FitLeveling",
                       style: TextStyle(
@@ -218,11 +217,11 @@ class LoginScreenState extends State<LoginScreen> {
                             alignment: Alignment.centerRight,
                             child: TextButton(
                               onPressed: () {
-                                // TODO: Xử lý quên mật khẩu
+        
                               },
-                              child: const Text(
-                                "Quên mật khẩu?", // Dùng chuỗi cứng thay vì t.forgotPassword
-                                style: TextStyle(
+                              child: Text(
+                                t.forgotPassword, // Dùng chuỗi cứng thay vì t.forgotPassword
+                                style: const TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
                                 ),
@@ -268,24 +267,24 @@ class LoginScreenState extends State<LoginScreen> {
 
                           // Thêm dòng phân cách với text
                           Row(
-                            children: const [
-                              Expanded(
+                            children: [
+                              const Expanded(
                                 child: Divider(
                                   color: Colors.white30,
                                   thickness: 1,
                                 ),
                               ),
                               Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 15),
+                                padding: const EdgeInsets.symmetric(horizontal: 15),
                                 child: Text(
-                                  "Hoặc đăng nhập với", // Sử dụng chuỗi cứng thay vì t.orLoginWith
-                                  style: TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 14,
-                                  ),
+                                        t.orLoginWith,
+                                        style: const TextStyle(
+                                          color: Colors.white70,
+                                          fontSize: 14,
+                                        ),
                                 ),
                               ),
-                              Expanded(
+                              const Expanded(
                                 child: Divider(
                                   color: Colors.white30,
                                   thickness: 1,
@@ -319,9 +318,9 @@ class LoginScreenState extends State<LoginScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                "Chưa có tài khoản? ", // Dùng chuỗi cứng thay vì t.dontHaveAccount
-                                style: TextStyle(color: Colors.white70),
+                              Text(
+                                t.dontHaveAccount, 
+                                style: const TextStyle(color: Colors.white70),
                               ),
                               GestureDetector(
                                 onTap:
@@ -332,9 +331,9 @@ class LoginScreenState extends State<LoginScreen> {
                                             (context) => const SignupScreen(),
                                       ),
                                     ),
-                                child: const Text(
-                                  "Đăng ký ngay", // Dùng chuỗi cứng thay vì t.signUpNow
-                                  style: TextStyle(
+                                child: Text(
+                                  t.signUpNow, 
+                                  style: const TextStyle(
                                     color: Color(0xFFFF9F43),
                                     fontWeight: FontWeight.bold,
                                   ),

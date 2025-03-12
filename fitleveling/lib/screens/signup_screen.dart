@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:fitleveling/l10n/app_localizations.dart';
-import 'login_screen.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -66,13 +65,13 @@ class SignupScreenState extends State<SignupScreen> {
 
     // Kiểm tra mật khẩu khớp nhau
     if (password != confirmPassword) {
-      showErrorDialog("Mật khẩu xác nhận không khớp"); // Thay t.passwordMismatch
+      showErrorDialog(t.passwordMismatch); 
       return;
     }
 
     // Kiểm tra đã đồng ý điều khoản
     if (!_acceptTerms) {
-      showErrorDialog("Vui lòng đồng ý với điều khoản dịch vụ"); // Thay t.termsRequired
+      showErrorDialog(t.termsRequired);
       return;
     }
 
@@ -82,15 +81,14 @@ class SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      // TODO: Thực hiện gọi API đăng ký tài khoản
       await Future.delayed(const Duration(seconds: 2)); // Giả lập thời gian gọi API
       
       // Nếu thành công, chuyển về màn hình đăng nhập hoặc vào app luôn
       if (mounted) {
         // Hiển thị thông báo thành công
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Đăng ký thành công! Vui lòng đăng nhập."), // Thay t.registerSuccess
+          SnackBar(
+            content: Text(t.registerSuccess), 
             backgroundColor: Colors.green,
           ),
         );
@@ -98,7 +96,7 @@ class SignupScreenState extends State<SignupScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      showErrorDialog("Đăng ký thất bại: ${e.toString()}"); // Thay t.registerFailed
+      showErrorDialog("t.registerFailed: ${e.toString()}");
     } finally {
       if (mounted) {
         setState(() {
@@ -199,9 +197,9 @@ class SignupScreenState extends State<SignupScreen> {
                     Image.asset('assets/logo.png', height: 100),
 
                     const SizedBox(height: 10),
-                    const Text(
-                      "Tạo tài khoản mới", // Thay t.createNewAccount
-                      style: TextStyle(
+                    Text(
+                      t.createNewAccount, 
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -228,7 +226,7 @@ class SignupScreenState extends State<SignupScreen> {
                             keyboardType: TextInputType.name,
                             onSubmitted: (_) => FocusScope.of(context).requestFocus(emailFocusNode),
                             decoration: InputDecoration(
-                              hintText: "Họ và tên", // Thay t.fullName
+                              hintText: t.fullName, 
                               prefixIcon: const Icon(Icons.person, color: Colors.white70),
                               filled: true,
                               fillColor: Colors.white10,
@@ -303,7 +301,7 @@ class SignupScreenState extends State<SignupScreen> {
                             focusNode: confirmPasswordFocusNode,
                             obscureText: _obscureConfirmPassword,
                             decoration: InputDecoration(
-                              hintText: "Xác nhận mật khẩu", // Thay t.confirmPassword
+                              hintText: t.confirmPassword, 
                               prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -338,8 +336,8 @@ class SignupScreenState extends State<SignupScreen> {
                                     _acceptTerms = value ?? false;
                                   });
                                 },
-                                fillColor: MaterialStateProperty.resolveWith(
-                                  (states) => states.contains(MaterialState.selected)
+                                fillColor: WidgetStateProperty.resolveWith(
+                                  (states) => states.contains(WidgetState.selected)
                                     ? const Color(0xFFFF9F43)
                                     : Colors.white30,
                                 ),
@@ -352,13 +350,13 @@ class SignupScreenState extends State<SignupScreen> {
                                     });
                                   },
                                   child: RichText(
-                                    text: const TextSpan(
-                                      text: "Tôi đồng ý với ", // Thay t.termsAgree
-                                      style: TextStyle(color: Colors.white70),
+                                    text: TextSpan(
+                                      text: t.termsAgree, 
+                                      style: const TextStyle(color: Colors.white70),
                                       children: [
                                         TextSpan(
-                                          text: "Điều khoản dịch vụ", // Thay t.termsOfService
-                                          style: TextStyle(
+                                          text: t.termsOfService,
+                                          style: const TextStyle(
                                             color: Color(0xFFFF9F43),
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -398,9 +396,9 @@ class SignupScreenState extends State<SignupScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text(
-                                    "Đăng ký", // Thay t.register
-                                    style: TextStyle(
+                                : Text(
+                                    t.register, 
+                                    style: const TextStyle(
                                       fontSize: 18,
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -423,9 +421,9 @@ class SignupScreenState extends State<SignupScreen> {
                                   // Quay lại màn hình đăng nhập
                                   Navigator.of(context).pop();
                                 },
-                                child: const Text(
-                                  "Đăng nhập ngay", // Thay t.loginNow
-                                  style: TextStyle(
+                                child: Text(
+                                  t.loginNow, 
+                                  style: const TextStyle(
                                     color: Color(0xFFFF9F43),
                                     fontWeight: FontWeight.bold,
                                   ),

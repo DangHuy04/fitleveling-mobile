@@ -32,7 +32,7 @@ class AppLocalizations {
   String get email => _localizedStrings['email'] ?? 'Email';
   String get password => _localizedStrings['password'] ?? 'Password';
   String get dontHaveAccount =>
-      _localizedStrings['dontHaveAccount'] ?? "Don't have an account? Sign up";
+      _localizedStrings['dontHaveAccount'] ?? "Don't have an account? ";
 
   // Thêm các thông báo lỗi
   String get emptyFields => _localizedStrings['emptyFields'] ?? 'Fields cannot be empty';
@@ -66,6 +66,7 @@ class AppLocalizations {
   String get alreadyHaveAccount =>
       _localizedStrings['alreadyHaveAccount'] ?? 'Already have an account? ';
   String get loginNow => _localizedStrings['loginNow'] ?? 'Login now';
+  String get error => _localizedStrings['error'] ?? 'Error !';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
