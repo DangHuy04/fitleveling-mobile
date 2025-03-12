@@ -1,0 +1,26 @@
+{
+  "email": "Email",
+  "password": "Password",
+  "login": "Login",
+  "emptyFields": "Email and password cannot be empty",
+  "invalidEmail": "Please enter a valid email",
+  "shortPassword": "Password must be at least 8 characters long",
+  
+  // Chuỗi mới cho đăng ký
+  "fullName": "Full name",
+  "confirmPassword": "Confirm password",
+  "passwordMismatch": "Passwords do not match",
+  "termsAgree": "I agree to the ",
+  "termsOfService": "Terms of Service",
+  "register": "Register",
+  "alreadyHaveAccount": "Already have an account? ",
+  "loginNow": "Login now",
+  "createNewAccount": "Create a new account",
+  "dontHaveAccount": "Don't have an account? ",
+  "signUpNow": "Sign up now", 
+  "forgotPassword": "Forgot password?",
+  "orLoginWith": "Or login with",
+  "termsRequired": "Please agree to the Terms of Service"
+  "registerSuccess": "Registration successful! Please login.",
+  "registerFailed": "Registration failed"
+}
