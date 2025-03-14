@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Sử dụng các routes
-app.use("/api", routes);
+app.use(routes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

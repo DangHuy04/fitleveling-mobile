@@ -2,8 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  static const String baseUrl = "http://localhost:5000"; // Đổi theo IP thực tế khi deploy
-
+  static const String baseUrl = "http://localhost:5000"; 
   // Gửi request GET
   Future<dynamic> getData(String endpoint) async {
     final response = await http.get(Uri.parse('$baseUrl/$endpoint'));

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:fitleveling/l10n/app_localizations.dart';
 import 'signup_screen.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -28,6 +29,8 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void validateAndSubmit() async {
+    if (!mounted) return; // Kiểm tra widget có còn mounted không
+
     final AppLocalizations? t = AppLocalizations.of(context);
     if (t == null) return;
 
@@ -35,33 +38,42 @@ class LoginScreenState extends State<LoginScreen> {
     String password = passwordController.text.trim();
 
     if (email.isEmpty || password.isEmpty) {
-      showErrorDialog(t.emptyFields);
+      if (mounted) showErrorDialog(t.emptyFields);
       return;
     }
 
     if (!RegExp(
       r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
     ).hasMatch(email)) {
-      showErrorDialog(t.invalidEmail);
+      if (mounted) showErrorDialog(t.invalidEmail);
       return;
     }
 
     if (password.length < 8) {
-      showErrorDialog(t.shortPassword);
+      if (mounted) showErrorDialog(t.shortPassword);
       return;
     }
 
     setState(() => _isLoading = true);
 
     try {
-      await Future.delayed(const Duration(seconds: 2));
-      // Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
+      final authService = AuthService();
+      final response = await authService.login(email, password);
+
+      if (!mounted) return; // Kiểm tra lại trước khi cập nhật UI hoặc điều hướng
+
+      if (response['token'] != null) {
+        Navigator.of(context).pushReplacementNamed('/home'); 
+      } else {
+        showErrorDialog(response['message'] ?? "Login failed");
+      }
     } catch (e) {
-      showErrorDialog("Đăng nhập thất bại: ${e.toString()}");
+      if (mounted) showErrorDialog("Đăng nhập thất bại: ${e.toString()}");
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
+
 
   void showErrorDialog(String message) {
     showDialog(
