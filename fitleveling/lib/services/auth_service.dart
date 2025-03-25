@@ -16,15 +16,22 @@ class AuthService {
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return responseData; 
+        // Đảm bảo response luôn có trường success
+        return {
+          "success": true,
+          ...responseData
+        };
       } else {
         return {
+          "success": false,
           "message": responseData["message"] ?? "Đăng nhập thất bại"
         };
       }
     } catch (e) {
-      print('Lỗi khi đăng nhập: $e');
-      return {"message": "Không thể kết nối đến máy chủ: $e"};
+      return {
+        "success": false,
+        "message": "Không thể kết nối đến máy chủ: $e"
+      };
     }
   }
 
@@ -39,15 +46,23 @@ class AuthService {
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
     
-      if (response.statusCode == 200) {
-        return responseData;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Đảm bảo response luôn có trường success
+        return {
+          "success": true,
+          ...responseData
+        };
       } else {
         return {
+          "success": false,
           "message": responseData["message"] ?? "Đăng ký thất bại"
         };
       }
     } catch (e) {
-      return {"message": "Không thể kết nối đến máy chủ"};
+      return {
+        "success": false,
+        "message": "Không thể kết nối đến máy chủ: $e"
+      };
     }
   }
 

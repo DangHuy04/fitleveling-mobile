@@ -88,15 +88,21 @@ class SignupScreenState extends State<SignupScreen> {
       if(!mounted) return;
       
       if (response['success'] == true) {
-        // Hiển thị thông báo thành công
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(t.registerSuccess), 
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Chuyển về màn hình đăng nhập
-        Navigator.pop(context);
+        // Hiển thị thông báo thành công trước khi pop
+        final scaffoldMessenger = ScaffoldMessenger.of(context);
+        
+        // Đảm bảo Navigator.pop() chạy sau khi hiển thị SnackBar
+        Future.delayed(Duration.zero, () {
+          scaffoldMessenger.showSnackBar(
+            SnackBar(
+              content: Text(t.registerSuccess), 
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          
+          Navigator.pop(context);
+        });
       } 
       else {
         showErrorDialog(response['message'] ?? "Register failed");
