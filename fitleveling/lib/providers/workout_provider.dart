@@ -3,7 +3,6 @@ import '../models/workout.dart';
 import '../models/daily_workout.dart';
 import '../models/workout_result.dart';
 import '../services/workout_service.dart';
-import '../services/auth_service.dart';
 import '../utils/constants.dart';
 
 class WorkoutProvider with ChangeNotifier {

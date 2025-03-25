@@ -7,7 +7,7 @@ import '../utils/constants.dart';
 
 class WorkoutService {
   final String token;
-  bool _useLocalData = true; // Sử dụng dữ liệu mẫu thay vì API
+  final bool _useLocalData = true; // Sử dụng dữ liệu mẫu thay vì API
   
   // Tạo dữ liệu mẫu cục bộ
   final List<Map<String, dynamic>> _sampleWorkouts = [

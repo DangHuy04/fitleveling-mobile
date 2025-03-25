@@ -3,10 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/workout_provider.dart';
-import '../services/workout_service.dart';
 import '../models/workout.dart';
 import '../models/daily_workout.dart';
-import '../widgets/progress_indicator.dart';
 
 class WorkoutScreen extends StatefulWidget {
   const WorkoutScreen({super.key});
@@ -264,7 +262,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
               borderRadius: BorderRadius.circular(15),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.2),
+                  color: Colors.black.withAlpha((0.2 * 255).round()),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -293,7 +291,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
+                            color: Colors.black.withAlpha((0.2 * 255).round()),
                             blurRadius: 4,
                             offset: const Offset(0, 2),
                           ),
@@ -315,7 +313,9 @@ class WorkoutScreenState extends State<WorkoutScreen>
                   borderRadius: BorderRadius.circular(10),
                   child: LinearProgressIndicator(
                     value: provider.completedCount / provider.maxDaily,
-                    backgroundColor: Colors.white.withOpacity(0.3),
+                    backgroundColor: Colors.white.withAlpha(
+                      (0.3 * 255).round(),
+                    ),
                     color: const Color(0xFFFF9F43),
                     minHeight: 10,
                   ),
@@ -350,11 +350,13 @@ class WorkoutScreenState extends State<WorkoutScreen>
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
-                          color: Colors.white.withOpacity(0.1),
+                          color: Colors.white.withAlpha((0.1 * 255).round()),
                           child: Container(
                             decoration: BoxDecoration(
                               border: Border.all(
-                                color: Colors.white.withOpacity(0.1),
+                                color: Colors.white.withAlpha(
+                                  (0.1 * 255).round(),
+                                ),
                                 width: 1,
                               ),
                               borderRadius: BorderRadius.circular(16),
@@ -376,7 +378,9 @@ class WorkoutScreenState extends State<WorkoutScreen>
                                   Text(
                                     workout.description,
                                     style: TextStyle(
-                                      color: Colors.white.withOpacity(0.8),
+                                      color: Colors.white.withAlpha(
+                                        (0.8 * 255).round(),
+                                      ),
                                       fontSize: 15,
                                     ),
                                   ),
@@ -393,10 +397,14 @@ class WorkoutScreenState extends State<WorkoutScreen>
                                               workout.difficulty == 'hard'
                                                   ? const Color(
                                                     0xFFE57373,
-                                                  ).withOpacity(0.2)
+                                                  ).withAlpha(
+                                                    (0.2 * 255).round(),
+                                                  )
                                                   : const Color(
                                                     0xFF81C784,
-                                                  ).withOpacity(0.2),
+                                                  ).withAlpha(
+                                                    (0.2 * 255).round(),
+                                                  ),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -449,7 +457,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
                                         decoration: BoxDecoration(
                                           color: const Color(
                                             0xFFFFD54F,
-                                          ).withOpacity(0.2),
+                                          ).withAlpha((0.2 * 255).round()),
                                           borderRadius: BorderRadius.circular(
                                             8,
                                           ),
@@ -585,12 +593,18 @@ class WorkoutScreenState extends State<WorkoutScreen>
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
+          colors: [
+            color.withAlpha((0.2 * 255).round()),
+            color.withAlpha((0.1 * 255).round()),
+          ],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3), width: 1),
+        border: Border.all(
+          color: color.withAlpha((0.3 * 255).round()),
+          width: 1,
+        ),
       ),
       child: Row(
         children: [
@@ -614,14 +628,14 @@ class WorkoutScreenState extends State<WorkoutScreen>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withAlpha((0.05 * 255).round()),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
         message,
         style: TextStyle(
           fontSize: 15,
-          color: Colors.white.withOpacity(0.6),
+          color: Colors.white.withAlpha((0.6 * 255).round()),
           fontStyle: FontStyle.italic,
         ),
         textAlign: TextAlign.center,
@@ -647,7 +661,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withAlpha((0.1 * 255).round()),
                   borderRadius: BorderRadius.circular(60),
                 ),
                 child: Icon(icon, size: 60, color: const Color(0xFFFF9F43)),
@@ -667,7 +681,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
                 subtitle,
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withAlpha((0.7 * 255).round()),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -693,10 +707,13 @@ class WorkoutScreenState extends State<WorkoutScreen>
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white.withOpacity(0.1),
+      color: Colors.white.withAlpha((0.1 * 255).round()),
       child: Container(
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.white.withOpacity(0.1), width: 1),
+          border: Border.all(
+            color: Colors.white.withAlpha((0.1 * 255).round()),
+            width: 1,
+          ),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ListTile(
@@ -716,7 +733,7 @@ class WorkoutScreenState extends State<WorkoutScreen>
               Text(
                 workout.description,
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.8),
+                  color: Colors.white.withAlpha((0.8 * 255).round()),
                   fontSize: 15,
                 ),
               ),
@@ -731,8 +748,12 @@ class WorkoutScreenState extends State<WorkoutScreen>
                     decoration: BoxDecoration(
                       color:
                           workout.difficulty == 'hard'
-                              ? const Color(0xFFE57373).withOpacity(0.2)
-                              : const Color(0xFF81C784).withOpacity(0.2),
+                              ? const Color(
+                                0xFFE57373,
+                              ).withAlpha((0.2 * 255).round())
+                              : const Color(
+                                0xFF81C784,
+                              ).withAlpha((0.2 * 255).round()),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color:
@@ -777,7 +798,9 @@ class WorkoutScreenState extends State<WorkoutScreen>
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFD54F).withOpacity(0.2),
+                      color: const Color(
+                        0xFFFFD54F,
+                      ).withAlpha((0.2 * 255).round()),
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: const Color(0xFFFFD54F),

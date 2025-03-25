@@ -5,7 +5,6 @@ import 'dart:async';
 import 'pet_screen.dart';
 import 'workout_screen.dart';
 import '../providers/workout_provider.dart';
-import '../services/auth_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
