@@ -23,5 +23,7 @@ const Map<String, String> appLocalizationsVi = {
   "registerSuccess": "Đăng ký thành công! Vui lòng đăng nhập.",
   "registerFailed": "Đăng ký thất bại",
   "loginFailed": "Email hoặc mật khẩu không chính xác",
-  "error": "Lỗi !"
+  "error": "Lỗi !",
+  "welcomeToFitleveling": "Chào mừng đến với FitLeveling",
+  "ok": "Đồng ý"
 };

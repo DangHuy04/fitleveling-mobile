@@ -65,6 +65,10 @@ class AppLocalizations {
       _localizedStrings['alreadyHaveAccount'] ?? 'Already have an account? ';
   String get loginNow => _localizedStrings['loginNow'] ?? 'Login now';
   String get error => _localizedStrings['error'] ?? 'Error !';
+  String get welcomeToFitleveling =>
+      _localizedStrings['welcomeToFitleveling'] ?? 'Welcome to FitLeveling';
+  String get loginFailed => _localizedStrings['loginFailed'] ?? 'Login failed';
+  String get ok => _localizedStrings['ok'] ?? 'OK';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

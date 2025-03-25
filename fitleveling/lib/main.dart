@@ -75,18 +75,18 @@ class MyAppState extends State<MyApp> {
         Locale('en', ''), // English
         Locale('vi', ''), // Vietnamese
       ],
+      locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
-        '/login': (context) => const LoginScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/login': (context) => const AssetPreloader(child: LoginScreen()),
+        '/home': (context) => const AssetPreloader(child: HomeScreen()),
       },
-      home: const AssetPreloader(child: HomeScreen()),
     );
   }
 }

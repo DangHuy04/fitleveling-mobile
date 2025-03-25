@@ -20,6 +20,14 @@ class LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Đảm bảo widget được rebuild khi ngôn ngữ thay đổi
+    final AppLocalizations? t = AppLocalizations.of(context);
+    if (t == null) return;
+  }
+
+  @override
   void dispose() {
     emailFocusNode.dispose();
     passwordFocusNode.dispose();
@@ -65,20 +73,19 @@ class LoginScreenState extends State<LoginScreen> {
         MyApp.of(context)?.locale.languageCode ?? 'en',
       );
 
-      if (!mounted) return; // Kiểm tra lại trước khi cập nhật UI hoặc điều hướng
+      if (!mounted) return;
 
       if (response['success'] == true) {
         Navigator.of(context).pushReplacementNamed('/home'); 
       } else {
-        showErrorDialog(response['message'] ?? "Login failed");
+        showErrorDialog(t.loginFailed);
       }
     } catch (e) {
-      if (mounted) showErrorDialog("Đăng nhập thất bại: ${e.toString()}");
+      if (mounted) showErrorDialog(t.loginFailed);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
 
   void showErrorDialog(String message) {
     showDialog(
@@ -90,11 +97,12 @@ class LoginScreenState extends State<LoginScreen> {
             t?.error ?? 'Error !',
             style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
-          content: Text(message),
+          content: Text(message, style: const TextStyle(color: Colors.black87)),
+          backgroundColor: Colors.white,
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text("OK"),
+              child: Text(t?.ok ?? 'OK'),
             ),
           ],
         );
@@ -162,9 +170,9 @@ class LoginScreenState extends State<LoginScreen> {
                     Image.asset('assets/logo.png', height: 150),
                     const SizedBox(height: 15),
               
-                    const Text(
-                      "Welcome to FitLeveling",
-                      style: TextStyle(
+                    Text(
+                      t.welcomeToFitleveling,
+                      style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -336,7 +344,7 @@ class LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                t.dontHaveAccount, 
+                                t.alreadyHaveAccount,
                                 style: const TextStyle(color: Colors.white70),
                               ),
                               GestureDetector(
