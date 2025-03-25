@@ -86,7 +86,7 @@ class MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: '/home',
+      initialRoute: '/login',
       routes: {
         '/login': (context) => const AssetPreloader(child: LoginScreen()),
         '/home': (context) => const AssetPreloader(child: HomeScreen()),
