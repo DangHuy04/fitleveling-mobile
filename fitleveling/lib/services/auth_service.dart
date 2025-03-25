@@ -5,22 +5,22 @@ class AuthService {
   static const String baseUrl = "http://localhost:5000";
 
   // Đăng nhập
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  Future<Map<String, dynamic>> login(String email, String password, String lang) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "password": password}),
+        body: jsonEncode({"email": email, "password": password, "lang": lang}),
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
-        return responseData; // Trả về token nếu đăng nhập thành công
+        return responseData; 
       } else {
         return {
           "message": responseData["message"] ?? "Đăng nhập thất bại"
-        }; // Chỉ lấy `message`
+        };
       }
     } catch (e) {
       return {"message": "Không thể kết nối đến máy chủ"};
@@ -28,17 +28,17 @@ class AuthService {
   }
 
   // Đăng ký
-  Future<Map<String, dynamic>> register(String email, String password) async {
+  Future<Map<String, dynamic>> register(String fullName, String email, String password, String lang) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/register'),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"email": email, "password": password}),
+        body: jsonEncode({"fullName": fullName, "email": email, "password": password, "lang": lang}),
       );
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 201) {
+    
+      if (response.statusCode == 200) {
         return responseData;
       } else {
         return {
@@ -49,4 +49,5 @@ class AuthService {
       return {"message": "Không thể kết nối đến máy chủ"};
     }
   }
+
 }

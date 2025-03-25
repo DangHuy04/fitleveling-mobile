@@ -22,5 +22,6 @@ const Map<String, String> appLocalizationsVi = {
   "termsRequired": "Vui lòng đồng ý với điều khoản dịch vụ",
   "registerSuccess": "Đăng ký thành công! Vui lòng đăng nhập.",
   "registerFailed": "Đăng ký thất bại",
+  "loginFailed": "Email hoặc mật khẩu không chính xác",
   "error": "Lỗi !"
 };

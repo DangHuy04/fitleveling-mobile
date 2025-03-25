@@ -52,8 +52,6 @@ class AppLocalizations {
   String get registerSuccess =>
       _localizedStrings['registerSuccess'] ??
       'Registration successful! Please login.';
-  String get registerFailed =>
-      _localizedStrings['registerFailed'] ?? 'Registration failed';
   String get createNewAccount =>
       _localizedStrings['createNewAccount'] ?? 'Create a new account';
   String get fullName => _localizedStrings['fullName'] ?? 'Full name';

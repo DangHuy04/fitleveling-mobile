@@ -1,22 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
 import 'providers/pet_provider.dart';
 import 'l10n/app_localizations.dart';
 
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => PetProvider())],
-      child: const MyApp(),
-    ),
-  );
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final String? savedLang = await getSavedLanguage();
+  runApp(MyApp(initialLocale: Locale(savedLang ?? 'en', '')));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+class MyApp extends StatefulWidget {
+  final Locale initialLocale;
+  const MyApp({super.key, required this.initialLocale});
+
+  static MyAppState? of(BuildContext context) => context.findAncestorStateOfType<MyAppState>();
+
+  @override
+  MyAppState createState() => MyAppState();
+}
+
+class MyAppState extends State<MyApp> {
+  late Locale _locale;
+
+  Locale get locale => _locale;
+
+  @override
+  void initState() {
+    super.initState();
+    _locale = widget.initialLocale;
+  }
+
+  void setLocale(Locale locale) async {
+    setState(() {
+      _locale = locale;
+    });
+    await saveLanguage(locale.languageCode);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,4 +131,14 @@ class _AssetPreloaderState extends State<AssetPreloader> {
 
     return widget.child;
   }
+// Lưu ngôn ngữ vào SharedPreferences
+Future<void> saveLanguage(String langCode) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('language', langCode);
+}
+
+// Lấy ngôn ngữ đã lưu
+Future<String?> getSavedLanguage() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('language');
 }

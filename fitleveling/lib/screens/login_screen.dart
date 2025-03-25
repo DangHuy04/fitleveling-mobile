@@ -54,15 +54,20 @@ class LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (_isLoading) return; 
     setState(() => _isLoading = true);
-
+    
     try {
       final authService = AuthService();
-      final response = await authService.login(email, password);
+      final response = await authService.login(
+        email,
+        password,
+        MyApp.of(context)?.locale.languageCode ?? 'en',
+      );
 
       if (!mounted) return; // Kiểm tra lại trước khi cập nhật UI hoặc điều hướng
 
-      if (response['token'] != null) {
+      if (response['success'] == true) {
         Navigator.of(context).pushReplacementNamed('/home'); 
       } else {
         showErrorDialog(response['message'] ?? "Login failed");

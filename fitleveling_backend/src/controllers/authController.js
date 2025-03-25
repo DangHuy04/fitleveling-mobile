@@ -1,29 +1,47 @@
+import bcrypt from "bcryptjs";
 import User from "../models/User.js";
-import jwt from "jsonwebtoken";
-
-// Tạo token JWT
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
-};
 
 // Xử lý đăng nhập
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const messages = {
+    en: {
+      user_not_found: "User does not exist!",
+      incorrect_password: "Password is incorrect!"
+    },
+    vi: {
+      user_not_found: "Người dùng không tồn tại!",
+      incorrect_password: "Mật khẩu không chính xác!"
+    }
+  };
 
-  try {
+  const { email, password, lang } = req.body;
+
+   try {
     const user = await User.findOne({ email });
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        token: generateToken(user._id),
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: messages[lang]?.user_not_found || "User not found!"
       });
-    } else {
-      res.status(401).json({ message: "Email hoặc mật khẩu không đúng" });
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: messages[lang]?.incorrect_password || "Incorrect password!"
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      fullName: user.fullName,
+      email: user.email,
+      avatar: user.avatar
+    });
+
   } catch (error) {
-    res.status(500).json({ message: "Lỗi server" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

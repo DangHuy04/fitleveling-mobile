@@ -1,3 +1,4 @@
+import 'package:fitleveling/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:fitleveling/l10n/app_localizations.dart';
@@ -81,10 +82,12 @@ class SignupScreenState extends State<SignupScreen> {
     });
 
     try {
-      await Future.delayed(const Duration(seconds: 2)); // Giả lập thời gian gọi API
+      final authService = AuthService();
+      final response = await authService.register(fullName, email, password, MyApp.of(context)?.locale.languageCode ?? 'en');
+
+      if(!mounted) return;
       
-      // Nếu thành công, chuyển về màn hình đăng nhập hoặc vào app luôn
-      if (mounted) {
+      if (response['success'] == true) {
         // Hiển thị thông báo thành công
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -94,9 +97,13 @@ class SignupScreenState extends State<SignupScreen> {
         );
         // Chuyển về màn hình đăng nhập
         Navigator.pop(context);
+      } 
+      else {
+        showErrorDialog(response['message'] ?? "Register failed");
       }
-    } catch (e) {
-      showErrorDialog("t.registerFailed: ${e.toString()}");
+    } 
+    catch (e) {
+      if (mounted) showErrorDialog("Dăng ký thất bại: ${e.toString()}");
     } finally {
       if (mounted) {
         setState(() {
