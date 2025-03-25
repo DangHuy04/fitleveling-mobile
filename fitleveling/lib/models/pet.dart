@@ -57,36 +57,36 @@ class Pet {
   // Trả về cấp độ tiến hóa của thú cưng (từ 0-5)
   int get evolutionStage {
     int stage = 0;
-    if (level >= 30)
+    if (level >= 30) {
       stage = 5;
-    else if (level >= 25)
+    } else if (level >= 25) {
       stage = 4;
-    else if (level >= 15)
+    } else if (level >= 15) {
       stage = 3;
-    else if (level >= 10)
+    } else if (level >= 10) {
       stage = 2;
-    else if (level >= 5)
+    } else if (level >= 5) {
       stage = 1;
-    else
+    } else {
       stage = 0;
+    }
 
-    print('DEBUG - Pet ${name}: Level ${level} -> Evolution Stage ${stage}');
     return stage;
   }
 
   // Lấy đường dẫn GIF dựa trên loại và cấp độ tiến hóa
   String get gifAsset {
-    return 'assets/pets/${type.name.toLowerCase()}/evolution_${evolutionStage}.gif';
+    return 'assets/pets/${type.name.toLowerCase()}/evolution_$evolutionStage.gif';
   }
 
   // Lấy đường dẫn Lottie JSON dựa trên loại và cấp độ tiến hóa
   String get lottieAsset {
-    return 'assets/pets/${type.name.toLowerCase()}/evolution_${evolutionStage}.json';
+    return 'assets/pets/${type.name.toLowerCase()}/evolution_$evolutionStage.json';
   }
 
   // Lấy đường dẫn hình ảnh tĩnh dự phòng
   String get imageAsset {
-    return 'assets/pets/${type.name.toLowerCase()}/evolution_${evolutionStage}.png';
+    return 'assets/pets/${type.name.toLowerCase()}/evolution_$evolutionStage.png';
   }
 
   // Hàm fallback để lấy icon trong trường hợp GIF không tồn tại

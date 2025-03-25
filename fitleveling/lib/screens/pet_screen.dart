@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import '../models/pet.dart';
 import '../providers/pet_provider.dart';
-import 'dart:io';
 import 'dart:convert';
 
 // Cache để lưu kết quả kiểm tra tồn tại của file
@@ -14,7 +13,7 @@ final Map<String, Image> _imageCache = {};
 final Map<String, ImageProvider> _imageProviders = {};
 
 class PetScreen extends StatefulWidget {
-  const PetScreen({Key? key}) : super(key: key);
+  const PetScreen({super.key});
 
   @override
   State<PetScreen> createState() => _PetScreenState();
@@ -22,7 +21,6 @@ class PetScreen extends StatefulWidget {
 
 class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  bool _initialLoadComplete = false;
 
   @override
   void initState() {
@@ -49,9 +47,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
         _imageProviders[pet.gifAsset] = AssetImage(pet.gifAsset);
       }
       precacheImage(_imageProviders[pet.gifAsset]!, context);
-      print(
-        'DEBUG - Precached GIF trong didChangeDependencies: ${pet.gifAsset}',
-      );
     }
   }
 
@@ -83,18 +78,11 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
 
           // Lưu trữ Image widget vào cache
           _imageCache[assetPath] = image;
-
-          print('DEBUG - Đã tải trước hình ảnh: $assetPath');
         } catch (e) {
-          print('DEBUG - Không thể tải trước hình ảnh: $assetPath - Lỗi: $e');
+          // Bỏ qua lỗi
         }
       }
     }
-
-    setState(() {
-      _initialLoadComplete = true;
-    });
-    print('DEBUG - Hoàn tất quá trình tải trước tất cả hình ảnh');
   }
 
   @override
@@ -234,7 +222,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
     final cachedResult = _assetTypeCache[cacheKey];
 
     if (cachedResult != null) {
-      print('DEBUG - Sử dụng kết quả từ cache cho: $cacheKey -> $cachedResult');
       // Nếu đã có trong cache, hiển thị ngay lập tức
       return _buildAnimationWidgetByType(pet, cachedResult);
     }
@@ -267,7 +254,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
       case PetAnimationType.image:
         return _buildStaticImage(pet);
       case PetAnimationType.none:
-      default:
         return _buildFallbackIcon(pet);
     }
   }
@@ -290,25 +276,19 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
 
   // Hiển thị GIF animation
   Widget _buildGifAnimation(Pet pet) {
-    print('DEBUG - Hiển thị GIF: ${pet.gifAsset}');
-
     final gifPath = pet.gifAsset;
 
     // Đảm bảo luôn có ImageProvider cho file này
     if (!_imageProviders.containsKey(gifPath)) {
       _imageProviders[gifPath] = AssetImage(gifPath);
       // Cache ngay lập tức để tránh tải lại nhiều lần
-      precacheImage(_imageProviders[gifPath]!, context).then((_) {
-        print('DEBUG - Đã tải và cache GIF: $gifPath trong lúc render');
-      });
+      precacheImage(_imageProviders[gifPath]!, context);
     }
 
     // Kiểm tra xem GIF đã được cache chưa
     final cachedImage = _imageCache[gifPath];
 
     if (cachedImage != null) {
-      print('DEBUG - Sử dụng GIF từ image cache: $gifPath');
-
       // Sử dụng RepaintBoundary để tối ưu hiệu suất render
       return RepaintBoundary(
         child: Container(
@@ -336,7 +316,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
           width: 200,
           height: 200,
           errorBuilder: (context, error, stackTrace) {
-            print('DEBUG - Lỗi hiển thị GIF: $error');
             return _buildFallbackIcon(pet);
           },
           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -362,9 +341,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                   filterQuality: FilterQuality.high,
                   width: 200,
                   height: 200,
-                );
-                print(
-                  'DEBUG - Đã lưu GIF vào cache sau khi tải xong frame: $gifPath',
                 );
               });
             }
@@ -392,7 +368,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
 
   // Hiển thị icon fallback
   Widget _buildFallbackIcon(Pet pet) {
-    print('DEBUG - Hiển thị icon fallback');
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -422,31 +397,21 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
     final lottieAsset = pet.lottieAsset;
     final gifAsset = pet.gifAsset;
     final imageAsset = pet.imageAsset;
-
-    print(
-      'DEBUG - Thú cưng: ${pet.name}, Cấp độ: ${pet.level}, Giai đoạn tiến hóa: ${pet.evolutionStage}',
-    );
-    print('DEBUG - Kiểm tra GIF: $gifAsset');
+    final buildContext = context;
 
     // Trực tiếp ưu tiên sử dụng GIF nếu trước đó đã tìm thấy
     try {
-      await DefaultAssetBundle.of(context).load(gifAsset);
-      print('DEBUG - Tìm thấy file GIF');
+      await DefaultAssetBundle.of(buildContext).load(gifAsset);
       return PetAnimationType.gif;
     } catch (e) {
-      print('DEBUG - Lỗi khi tải GIF: $e');
       try {
-        await DefaultAssetBundle.of(context).load(imageAsset);
-        print('DEBUG - Tìm thấy file PNG');
+        await DefaultAssetBundle.of(buildContext).load(imageAsset);
         return PetAnimationType.image;
       } catch (e) {
-        print('DEBUG - Không tìm thấy PNG: $e');
         try {
-          await DefaultAssetBundle.of(context).load(lottieAsset);
-          print('DEBUG - Tìm thấy file Lottie');
+          await DefaultAssetBundle.of(buildContext).load(lottieAsset);
           return PetAnimationType.lottie;
         } catch (e) {
-          print('DEBUG - Không tìm thấy Lottie: $e');
           return PetAnimationType.none;
         }
       }
@@ -611,8 +576,12 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                       context,
                     ).loadString('AssetManifest.json'),
                     builder: (context, snapshot) {
-                      if (!snapshot.hasData)
+                      if (!snapshot.hasData) {
                         return const CircularProgressIndicator();
+                      }
+                      if (!mounted) {
+                        return const Text('Widget không còn được gắn kết');
+                      }
                       try {
                         final Map<String, dynamic> manifestMap =
                             Map<String, dynamic>.from(

@@ -34,13 +34,11 @@ class PetProvider extends ChangeNotifier {
   Pet? get activePet {
     // Nếu _activePet bị null, sử dụng pet từ cache
     if (_activePet == null && _cachedActivePet != null) {
-      print('DEBUG - Khôi phục activePet từ cache');
       _activePet = _cachedActivePet;
     }
 
     // Nếu vẫn null (hiếm khi xảy ra), sử dụng pet đầu tiên
     if (_activePet == null && _pets.isNotEmpty) {
-      print('DEBUG - Khôi phục activePet từ danh sách pets');
       _activePet = _pets.first;
     }
 
@@ -58,7 +56,6 @@ class PetProvider extends ChangeNotifier {
     );
     _activePet = pet;
     _cachedActivePet = pet; // Cập nhật cache
-    print('DEBUG - Đã đổi thú cưng thành: ${pet.name}');
     notifyListeners();
   }
 
@@ -78,9 +75,7 @@ class PetProvider extends ChangeNotifier {
 
       // Kiểm tra xem thú cưng có tiến hóa hay không
       if (updatedPet.evolutionStage > oldEvolutionStage) {
-        print(
-          'DEBUG - Thú cưng đã tiến hóa: ${updatedPet.name} - Giai đoạn ${updatedPet.evolutionStage}',
-        );
+        // Thú cưng đã tiến hóa
       }
 
       notifyListeners();

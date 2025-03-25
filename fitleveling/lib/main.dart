@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/login_screen.dart';
 import 'providers/pet_provider.dart';
 import 'l10n/app_localizations.dart';
 
@@ -121,7 +120,6 @@ class _AssetPreloaderState extends State<AssetPreloader> {
         _assetsLoaded = true;
       });
     } catch (e) {
-      print('DEBUG - Lỗi khi tải trước tài nguyên: $e');
       setState(() {
         _assetsLoaded = true;
       });
