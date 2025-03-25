@@ -69,6 +69,44 @@ class AppLocalizations {
       _localizedStrings['welcomeToFitleveling'] ?? 'Welcome to FitLeveling';
   String get loginFailed => _localizedStrings['loginFailed'] ?? 'Login failed';
   String get ok => _localizedStrings['ok'] ?? 'OK';
+  
+  // Workout
+  String get workouts => _localizedStrings['workouts'] ?? 'Workouts';
+  String get todaysWorkouts =>
+      _localizedStrings['todaysWorkouts'] ?? 'Today\'s Workouts';
+  String get allWorkouts => _localizedStrings['allWorkouts'] ?? 'All Workouts';
+  String get easyWorkouts =>
+      _localizedStrings['easyWorkouts'] ?? 'Easy Workouts';
+  String get hardWorkouts =>
+      _localizedStrings['hardWorkouts'] ?? 'Hard Workouts';
+  String get workoutAdded =>
+      _localizedStrings['workoutAdded'] ?? 'Workout added to today\'s list';
+  String get noDailyWorkouts =>
+      _localizedStrings['noDailyWorkouts'] ?? 'No workouts for today';
+  String get noEasyWorkouts =>
+      _localizedStrings['noEasyWorkouts'] ?? 'No easy workouts';
+  String get noHardWorkouts =>
+      _localizedStrings['noHardWorkouts'] ?? 'No hard workouts';
+  String get add => _localizedStrings['add'] ?? 'Add';
+  String get added => _localizedStrings['added'] ?? 'Added';
+  String get complete => _localizedStrings['complete'] ?? 'Complete';
+  String get completedWorkouts =>
+      _localizedStrings['completedWorkouts'] ?? 'Completed Workouts:';
+  String get limitReached =>
+      _localizedStrings['limitReached'] ?? 'Limit Reached';
+  String get xpGained => _localizedStrings['xpGained'] ?? 'Gained';
+  String get levelUp => _localizedStrings['levelUp'] ?? 'Level up!';
+  String get congrats => _localizedStrings['congrats'] ?? 'Congratulations!';
+  String get reachedLevel =>
+      _localizedStrings['reachedLevel'] ?? 'You have reached level';
+  String get hard => _localizedStrings['hard'] ?? 'Hard';
+  String get easy => _localizedStrings['easy'] ?? 'Easy';
+  String get noWorkouts =>
+      _localizedStrings['noWorkouts'] ?? 'No workouts available';
+  String get checkLater =>
+      _localizedStrings['checkLater'] ?? 'Please check back later!';
+  String get addWorkoutsFromList =>
+      _localizedStrings['addWorkoutsFromList'] ?? 'Add workouts from the list!';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

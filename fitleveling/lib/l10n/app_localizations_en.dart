@@ -25,5 +25,30 @@ const Map<String, String> appLocalizationsEn = {
   'loginFailed': 'Email or password is incorrect',
   'error': 'Error !',
   'welcomeToFitleveling': 'Welcome to FitLeveling',
-  'ok': 'OK'
+  'ok': 'OK',
+
+  // Workout
+  'workouts': 'Workouts',
+  'todaysWorkouts': 'Today\'s Workouts',
+  'allWorkouts': 'All Workouts',
+  'easyWorkouts': 'Easy Workouts',
+  'hardWorkouts': 'Hard Workouts',
+  'workoutAdded': 'Workout added to today\'s list',
+  'noDailyWorkouts': 'No workouts for today',
+  'noEasyWorkouts': 'No easy workouts',
+  'noHardWorkouts': 'No hard workouts',
+  'add': 'Add',
+  'added': 'Added',
+  'complete': 'Complete',
+  'completedWorkouts': 'Completed Workouts:',
+  'limitReached': 'Limit Reached',
+  'xpGained': 'Gained',
+  'levelUp': 'Level up!',
+  'congrats': 'Congratulations!',
+  'reachedLevel': 'You have reached level',
+  'hard': 'Hard',
+  'easy': 'Easy',
+  'noWorkouts': 'No workouts available',
+  'checkLater': 'Please check back later!',
+  'addWorkoutsFromList': 'Add workouts from the list!'
 };

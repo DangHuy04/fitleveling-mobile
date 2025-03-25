@@ -6,6 +6,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   avatar: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
+  xp: { type: Number, default: 0 },
+  level: { type: Number, default: 1 },
 
   // Pet hiện tại của user (chỉ có 1 pet tại một thời điểm)
   currentPet: { type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: null },

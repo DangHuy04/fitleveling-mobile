@@ -25,5 +25,30 @@ const Map<String, String> appLocalizationsVi = {
   "loginFailed": "Email hoặc mật khẩu không chính xác",
   "error": "Lỗi !",
   "welcomeToFitleveling": "Chào mừng đến với FitLeveling",
-  "ok": "Đồng ý"
+  "ok": "Đồng ý",
+
+  // Workout
+  "workouts": "Bài tập",
+  "todaysWorkouts": "Bài tập hôm nay",
+  "allWorkouts": "Tất cả bài tập",
+  "easyWorkouts": "Bài tập dễ",
+  "hardWorkouts": "Bài tập khó",
+  "workoutAdded": "Đã thêm bài tập vào danh sách hôm nay",
+  "noDailyWorkouts": "Chưa có bài tập nào cho hôm nay",
+  "noEasyWorkouts": "Không có bài tập dễ nào",
+  "noHardWorkouts": "Không có bài tập khó nào",
+  "add": "Thêm",
+  "added": "Đã thêm",
+  "complete": "Hoàn thành",
+  "completedWorkouts": "Bài tập đã hoàn thành:",
+  "limitReached": "Đã đạt giới hạn",
+  "xpGained": "Nhận được",
+  "levelUp": "Lên cấp!",
+  "congrats": "Chúc mừng!",
+  "reachedLevel": "Bạn đã đạt đến cấp độ",
+  "hard": "Khó",
+  "easy": "Dễ",
+  "noWorkouts": "Không có bài tập nào",
+  "checkLater": "Vui lòng kiểm tra lại sau nhé!",
+  "addWorkoutsFromList": "Hãy thêm bài tập từ danh sách nhé!"
 };
