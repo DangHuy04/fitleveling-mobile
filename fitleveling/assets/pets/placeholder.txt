@@ -1,0 +1,20 @@
+Hướng dẫn tạo hình ảnh thú cưng:
+
+1. Mỗi loại thú cưng (dragon, fox, axolotl) cần 5 hình ảnh cho các giai đoạn tiến hóa:
+   - evolution_1.png (Cấp độ 5)
+   - evolution_2.png (Cấp độ 10)
+   - evolution_3.png (Cấp độ 15)
+   - evolution_4.png (Cấp độ 25)
+   - evolution_5.png (Cấp độ 30)
+
+2. Có thể tải hình ảnh miễn phí từ:
+   - https://itch.io/game-assets/free/tag-virtual-pet
+   - https://kenney.nl/assets/animal-pack-redux
+   - https://www.deviantart.com/neoriceisgood/art/100-Animal-Sprites-875334880
+   
+3. Đảm bảo hình ảnh có kích thước phù hợp, nền trong suốt (PNG) và đặt tên theo quy tắc trên.
+
+Tài nguyên được khuyến nghị:
+- Rồng: Sử dụng sprite sheet từ trang web Pokémon fan hoặc game tương tự
+- Cáo: Sử dụng sprite từ bộ sưu tập động vật của Kenney
+- Axolotl: Sử dụng sprite từ "Axolotl Bud" trên itch.io 

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:provider/provider.dart';
+import 'dart:async';
+import '../providers/pet_provider.dart';
+import 'pet_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,12 +13,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
+  bool _isBlinking = false;
+  Timer? _blinkTimer;
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      _isBlinking = true;
     });
+    
+    // Hủy timer cũ nếu có
+    _blinkTimer?.cancel();
+
+    // Đặt timer để tắt hiệu ứng nháy sau 150ms
+    _blinkTimer = Timer(const Duration(milliseconds: 150), () {
+      setState(() {
+        _isBlinking = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _blinkTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -50,22 +73,21 @@ class HomeScreenState extends State<HomeScreen> {
                       ),
                       Row(
                         children: [
-                          CircleIcon(icon: FontAwesomeIcons.bell, color: const Color(0xFFFF9F43)),
+                          CircleIcon(
+                            icon: FontAwesomeIcons.bell,
+                            color: const Color(0xFFFF9F43),
+                          ),
                           const SizedBox(width: 10),
-                          CircleIcon(icon: FontAwesomeIcons.gear, color: Color(0xFFFF9F43)),
+                          CircleIcon(
+                            icon: FontAwesomeIcons.gear,
+                            color: Color(0xFFFF9F43),
+                          ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      "Content Here",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                  ),
-                ),
+                Expanded(child: _getScreenForIndex(_selectedIndex)),
               ],
             ),
           ),
@@ -86,39 +108,93 @@ class HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              AnimatedPositioned(
-                duration: Duration(milliseconds: 300),
-                left: (_selectedIndex * (MediaQuery.of(context).size.width - 40) / 4) + 45,
-                top: -5,
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Color(0xFFFF9F43),
-                    shape: BoxShape.circle,
-                  ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(4, (index) {
+              List<IconData> icons = [
+                FontAwesomeIcons.house,
+                FontAwesomeIcons.dumbbell,
+                FontAwesomeIcons.users,
+                FontAwesomeIcons.trophy,
+              ];
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(15),
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(4, (index) {
-                  List<IconData> icons = [
-                    FontAwesomeIcons.house,
-                    FontAwesomeIcons.dumbbell,
-                    FontAwesomeIcons.users,
-                    FontAwesomeIcons.trophy
-                  ];
-                  return IconButton(
-                    icon: Icon(icons[index], color: Colors.white30),
-                    onPressed: () => _onItemTapped(index),
-                  );
-                }),
-              ),
-            ],
+                padding: const EdgeInsets.all(5),
+                child: IconButton(
+                  icon: Icon(
+                    icons[index],
+                    color:
+                        _selectedIndex == index
+                            ? _isBlinking && _selectedIndex == index
+                                ? Colors.white
+                                : const Color(0xFFFF9F43)
+                            : Colors.white30,
+                    size: _selectedIndex == index ? 30 : 28,
+                  ),
+                  onPressed: () => _onItemTapped(index),
+                ),
+              );
+            }),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getScreenForIndex(int index) {
+    // Chỉ hiển thị màn hình thú cưng ở tab Home (index 0)
+    switch (index) {
+      case 0:
+        return const PetScreen();
+      case 1:
+        return _buildPlaceholderScreen(
+          'Tập luyện',
+          'Chức năng tập luyện đang được phát triển',
+        );
+      case 2:
+        return _buildPlaceholderScreen(
+          'Cộng đồng',
+          'Chức năng cộng đồng đang được phát triển',
+        );
+      case 3:
+        return _buildPlaceholderScreen(
+          'Thành tích',
+          'Chức năng thành tích đang được phát triển',
+        );
+      default:
+        return const PetScreen();
+    }
+  }
+
+  // Widget hiển thị nội dung tạm thời cho các tab khác
+  Widget _buildPlaceholderScreen(String title, String description) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(FontAwesomeIcons.hourglassHalf, size: 80, color: Colors.amber),
+            const SizedBox(height: 30),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              description,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16, color: Colors.white70),
+            ),
+          ],
         ),
       ),
     );
