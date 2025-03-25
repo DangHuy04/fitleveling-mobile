@@ -8,10 +8,28 @@ import 'screens/login_screen.dart';
 import 'providers/pet_provider.dart';
 import 'l10n/app_localizations.dart';
 
+// Lưu ngôn ngữ vào SharedPreferences
+Future<void> saveLanguage(String langCode) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString('language', langCode);
+}
+
+// Lấy ngôn ngữ đã lưu
+Future<String?> getSavedLanguage() async {
+  final prefs = await SharedPreferences.getInstance();
+  return prefs.getString('language');
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final String? savedLang = await getSavedLanguage();
-  runApp(MyApp(initialLocale: Locale(savedLang ?? 'en', '')));
+  
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (context) => PetProvider())],
+      child: MyApp(initialLocale: Locale(savedLang ?? 'en', '')),
+    ),
+  );
 }
 
 class MyApp extends StatefulWidget {
@@ -131,14 +149,4 @@ class _AssetPreloaderState extends State<AssetPreloader> {
 
     return widget.child;
   }
-// Lưu ngôn ngữ vào SharedPreferences
-Future<void> saveLanguage(String langCode) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString('language', langCode);
-}
-
-// Lấy ngôn ngữ đã lưu
-Future<String?> getSavedLanguage() async {
-  final prefs = await SharedPreferences.getInstance();
-  return prefs.getString('language');
 }
