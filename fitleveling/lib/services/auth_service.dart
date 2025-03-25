@@ -23,7 +23,8 @@ class AuthService {
         };
       }
     } catch (e) {
-      return {"message": "Không thể kết nối đến máy chủ"};
+      print('Lỗi khi đăng nhập: $e');
+      return {"message": "Không thể kết nối đến máy chủ: $e"};
     }
   }
 

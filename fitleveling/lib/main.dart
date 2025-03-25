@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'providers/pet_provider.dart';
+import 'providers/user_provider.dart';
 import 'l10n/app_localizations.dart';
 
 // Lưu ngôn ngữ vào SharedPreferences
@@ -25,7 +26,10 @@ void main() async {
   
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (context) => PetProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (context) => PetProvider()),
+        ChangeNotifierProvider(create: (context) => UserProvider()),
+      ],
       child: MyApp(initialLocale: Locale(savedLang ?? 'en', '')),
     ),
   );

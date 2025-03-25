@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
@@ -7,6 +6,12 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   avatar: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
+
+  // Pet hiện tại của user (chỉ có 1 pet tại một thời điểm)
+  currentPet: { type: mongoose.Schema.Types.ObjectId, ref: "Pet", default: null },
+  
+  // Danh sách tất cả pet của user
+  pets: [{ type: mongoose.Schema.Types.ObjectId, ref: "Pet" }]
 });
 
 const User = mongoose.model("User", userSchema);

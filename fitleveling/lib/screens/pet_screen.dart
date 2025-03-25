@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
 import '../models/pet.dart';
 import '../providers/pet_provider.dart';
+import '../providers/user_provider.dart';
 import 'dart:convert';
 
 // Cache để lưu kết quả kiểm tra tồn tại của file
@@ -95,6 +96,43 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return Consumer<PetProvider>(
       builder: (context, petProvider, child) {
+        // Hiển thị loading indicator nếu đang tải
+        if (petProvider.isLoading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        // Hiển thị thông báo lỗi nếu có
+        if (petProvider.error != null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  petProvider.error!,
+                  style: const TextStyle(color: Colors.red),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    // Thử tải lại dữ liệu
+                    petProvider.loadPets('user_id'); // Thay thế 'user_id' bằng ID thực tế
+                  },
+                  child: const Text('Thử lại'),
+                ),
+              ],
+            ),
+          );
+        }
+
         final pet = petProvider.activePet;
 
         if (pet == null) {
@@ -119,7 +157,7 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
               const SizedBox(height: 10),
               // Hiển thị cấp độ
               Text(
-                'Cấp độ: ${pet.level} (Tiến hóa: ${pet.evolutionStage}/5)',
+                'Cấp độ: ${pet.level} (Tiến hóa: ${pet.evolutionStage}/${pet.maxEvolutionStage})',
                 style: const TextStyle(fontSize: 18, color: Colors.white70),
               ),
               const SizedBox(height: 30),
@@ -137,19 +175,19 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                 ),
               ),
 
-              // Thanh kinh nghiệm
+              // Hiển thị thanh kinh nghiệm
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Kinh nghiệm: ${pet.experience}/${pet.requiredExperience}',
+                    'Kinh nghiệm: ${pet.experience}/${50 * pet.level * pet.evolutionStage}',
                     style: const TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                   const SizedBox(height: 8),
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: LinearProgressIndicator(
-                      value: pet.experiencePercentage,
+                      value: pet.experience / (50 * pet.level * pet.evolutionStage),
                       minHeight: 20,
                       backgroundColor: Colors.blueGrey.shade800,
                       valueColor: AlwaysStoppedAnimation<Color>(
@@ -161,18 +199,6 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
               ),
 
               const SizedBox(height: 30),
-
-              // Nút thêm kinh nghiệm
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildExperienceButton(petProvider, 10, 'Tập 10 XP'),
-                  _buildExperienceButton(petProvider, 50, 'Tập 50 XP'),
-                  _buildExperienceButton(petProvider, 100, 'Tập 100 XP'),
-                ],
-              ),
-
-              const SizedBox(height: 20),
 
               // Nút chọn thú cưng
               ElevatedButton.icon(
@@ -187,6 +213,25 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                   ),
                 ),
                 onPressed: () {
+                  // Kiểm tra xem pet hiện tại đã đạt cấp độ cao nhất chưa
+                  if (pet.evolutionStage < pet.maxEvolutionStage) {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Không thể đổi thú cưng'),
+                        content: Text(
+                          'Bạn cần đạt đến cấp độ cao nhất (${pet.maxEvolutionStage}) của ${pet.name} để đổi thú cưng',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            child: const Text('Đóng'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
                   _showPetSelectionDialog(context, petProvider);
                 },
               ),
@@ -278,79 +323,42 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   Widget _buildGifAnimation(Pet pet) {
     final gifPath = pet.gifAsset;
 
-    // Đảm bảo luôn có ImageProvider cho file này
-    if (!_imageProviders.containsKey(gifPath)) {
-      _imageProviders[gifPath] = AssetImage(gifPath);
-      // Cache ngay lập tức để tránh tải lại nhiều lần
-      precacheImage(_imageProviders[gifPath]!, context);
-    }
-
-    // Kiểm tra xem GIF đã được cache chưa
-    final cachedImage = _imageCache[gifPath];
-
-    if (cachedImage != null) {
-      // Sử dụng RepaintBoundary để tối ưu hiệu suất render
-      return RepaintBoundary(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
-          alignment: Alignment.center,
-          color:
-              Colors.transparent, // Thêm màu nền để tránh hiện tượng nhấp nháy
-          child: cachedImage,
-        ),
-      );
-    }
-
-    // Nếu chưa có trong cache, tạo mới và hiển thị
     return RepaintBoundary(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 200, maxHeight: 200),
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         alignment: Alignment.center,
-        color: Colors.transparent, // Thêm màu nền để tránh hiện tượng nhấp nháy
-        child: Image(
-          image: _imageProviders[gifPath]!,
-          fit: BoxFit.contain,
-          gaplessPlayback: true,
-          isAntiAlias: true,
-          filterQuality: FilterQuality.high,
-          width: 200,
-          height: 200,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildFallbackIcon(pet);
-          },
-          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-            // Nếu frame là null, nghĩa là đang tải
-            if (frame == null) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Opacity(opacity: 0.5, child: child),
-                  const CircularProgressIndicator(),
-                ],
-              );
-            }
-
-            // Lưu vào cache khi đã tải xong frame đầu tiên
-            if (frame > 0 && !_imageCache.containsKey(gifPath)) {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _imageCache[gifPath] = Image(
-                  image: _imageProviders[gifPath]!,
-                  fit: BoxFit.contain,
-                  gaplessPlayback: true,
-                  isAntiAlias: true,
-                  filterQuality: FilterQuality.high,
-                  width: 200,
-                  height: 200,
+        color: Colors.transparent,
+        child: Transform.scale(
+          scale: 2.0, // Phóng to gấp đôi kích thước gốc
+          child: Image.asset(
+            gifPath,
+            gaplessPlayback: true,
+            isAntiAlias: true,
+            filterQuality: FilterQuality.high,
+            fit: BoxFit.contain,
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (frame == null) {
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Opacity(opacity: 0.5, child: child),
+                    const CircularProgressIndicator(),
+                  ],
                 );
-              });
-            }
-
-            return AnimatedOpacity(
-              opacity: 1.0,
-              duration: const Duration(milliseconds: 300),
-              child: child,
-            );
-          },
+              }
+              return AnimatedOpacity(
+                opacity: 1.0,
+                duration: const Duration(milliseconds: 300),
+                child: child,
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return _buildFallbackIcon(pet);
+            },
+          ),
         ),
       ),
     );
@@ -418,95 +426,40 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
     }
   }
 
-  // Tạo nút thêm kinh nghiệm
-  Widget _buildExperienceButton(
-    PetProvider petProvider,
-    int amount,
-    String label,
-  ) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.deepPurple.shade700,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      ),
-      onPressed: () {
-        petProvider.addExperience(amount);
-        _checkForEvolution(context, petProvider);
-      },
-      child: Text(label),
-    );
-  }
-
-  // Hàm kiểm tra và hiển thị thông báo tiến hóa
-  void _checkForEvolution(BuildContext context, PetProvider petProvider) {
-    final pet = petProvider.activePet;
-    if (pet == null) return;
-
-    // Hiển thị thông báo tiến hóa nếu pet ở mức tiến hóa 1, 2, 3, 4, hoặc 5
-    if (pet.evolutionStage > 0 && pet.level == 5 ||
-        pet.level == 10 ||
-        pet.level == 15 ||
-        pet.level == 25 ||
-        pet.level == 30) {
-      showDialog(
-        context: context,
-        builder:
-            (context) => AlertDialog(
-              title: const Text('Tiến hóa!'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.auto_awesome, color: Colors.amber, size: 50),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${pet.name} đã tiến hóa lên giai đoạn ${pet.evolutionStage}!',
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Tuyệt vời!'),
-                ),
-              ],
-            ),
-      );
-    }
-  }
-
   // Hiển thị dialog chọn thú cưng
   void _showPetSelectionDialog(BuildContext context, PetProvider petProvider) {
+    final userId = context.read<UserProvider>().id;
+    if (userId == null) return;
+
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            title: const Text('Chọn thú cưng'),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: petProvider.pets.length,
-                itemBuilder: (context, index) {
-                  final pet = petProvider.pets[index];
-                  return ListTile(
-                    leading: Icon(
-                      getPetIcon(pet.type),
-                      color: getPetColor(pet.type),
-                    ),
-                    title: Text(pet.name),
-                    subtitle: Text(
-                      '${pet.type.displayName} - Cấp ${pet.level}',
-                    ),
-                    onTap: () {
-                      petProvider.setActivePet(pet.id);
-                      Navigator.of(context).pop();
-                    },
-                  );
+      builder: (context) => AlertDialog(
+        title: const Text('Chọn thú cưng'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: petProvider.pets.length,
+            itemBuilder: (context, index) {
+              final pet = petProvider.pets[index];
+              return ListTile(
+                leading: Icon(
+                  getPetIcon(pet.type),
+                  color: getPetColor(pet.type),
+                ),
+                title: Text(pet.name),
+                subtitle: Text(
+                  '${pet.type.displayName} - Cấp ${pet.level}',
+                ),
+                onTap: () {
+                  petProvider.setActivePet(userId, pet.id);
+                  Navigator.of(context).pop();
                 },
-              ),
-            ),
+              );
+            },
           ),
+        ),
+      ),
     );
   }
 

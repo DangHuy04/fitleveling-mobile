@@ -7,6 +7,8 @@ class Pet {
   final int level;
   final int experience;
   final int requiredExperience;
+  final int maxEvolutionStage;
+  final int evolutionStage;
 
   Pet({
     required this.id,
@@ -15,6 +17,8 @@ class Pet {
     this.level = 1,
     this.experience = 0,
     this.requiredExperience = 100,
+    required this.maxEvolutionStage,
+    required this.evolutionStage,
   });
 
   Pet copyWith({
@@ -24,6 +28,8 @@ class Pet {
     int? level,
     int? experience,
     int? requiredExperience,
+    int? maxEvolutionStage,
+    int? evolutionStage,
   }) {
     return Pet(
       id: id ?? this.id,
@@ -32,19 +38,20 @@ class Pet {
       level: level ?? this.level,
       experience: experience ?? this.experience,
       requiredExperience: requiredExperience ?? this.requiredExperience,
+      maxEvolutionStage: maxEvolutionStage ?? this.maxEvolutionStage,
+      evolutionStage: evolutionStage ?? this.evolutionStage,
     );
   }
 
   Pet addExperience(int amount) {
     int newExperience = experience + amount;
     int newLevel = level;
-    int newRequiredExperience = requiredExperience;
+    int newRequiredExperience = 50 * level * evolutionStage; // Kinh nghiệm cần thiết dựa trên cấp độ và giai đoạn tiến hóa
 
     while (newExperience >= newRequiredExperience) {
       newExperience -= newRequiredExperience;
       newLevel++;
-      // Mỗi cấp độ sẽ cần thêm kinh nghiệm hơn
-      newRequiredExperience = (newRequiredExperience * 1.5).round();
+      newRequiredExperience = 50 * newLevel * evolutionStage; // Cập nhật kinh nghiệm yêu cầu cho cấp độ mới
     }
 
     return copyWith(
@@ -52,26 +59,6 @@ class Pet {
       level: newLevel,
       requiredExperience: newRequiredExperience,
     );
-  }
-
-  // Trả về cấp độ tiến hóa của thú cưng (từ 0-5)
-  int get evolutionStage {
-    int stage = 0;
-    if (level >= 30) {
-      stage = 5;
-    } else if (level >= 25) {
-      stage = 4;
-    } else if (level >= 15) {
-      stage = 3;
-    } else if (level >= 10) {
-      stage = 2;
-    } else if (level >= 5) {
-      stage = 1;
-    } else {
-      stage = 0;
-    }
-
-    return stage;
   }
 
   // Lấy đường dẫn GIF dựa trên loại và cấp độ tiến hóa
@@ -241,7 +228,38 @@ class Pet {
 
   // Tính phần trăm kinh nghiệm hiện tại
   double get experiencePercentage {
-    return experience / requiredExperience;
+    return experience / (50 * level * evolutionStage);
+  }
+
+  // Chuyển đổi từ JSON sang đối tượng Pet
+  factory Pet.fromJson(Map<String, dynamic> json) {
+    return Pet(
+      id: json['_id'] ?? '',
+      name: json['name'] ?? '',
+      type: PetType.values.firstWhere(
+        (type) => type.name == json['type'],
+        orElse: () => PetType.dragon,
+      ),
+      level: json['level'] ?? 1,
+      experience: json['experience'] ?? 0,
+      requiredExperience: json['requiredExperience'] ?? 100,
+      maxEvolutionStage: json['maxEvolutionStage'] ?? 5,
+      evolutionStage: json['evolutionStage'] ?? 0,
+    );
+  }
+
+  // Chuyển đổi đối tượng Pet sang JSON
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'name': name,
+      'type': type.name,
+      'level': level,
+      'experience': experience,
+      'requiredExperience': requiredExperience,
+      'maxEvolutionStage': maxEvolutionStage,
+      'evolutionStage': evolutionStage,
+    };
   }
 }
 

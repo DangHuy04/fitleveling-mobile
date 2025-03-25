@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
 import 'package:fitleveling/l10n/app_localizations.dart';
 import 'signup_screen.dart';
 import '../services/auth_service.dart';
+import '../providers/user_provider.dart';
+import '../providers/pet_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -76,12 +79,36 @@ class LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (response['success'] == true) {
-        Navigator.of(context).pushReplacementNamed('/home'); 
+        // Kiểm tra xem có ID không
+        if (!response.containsKey('id')) {
+          showErrorDialog('Lỗi: Không thể lấy thông tin user. Vui lòng thử lại sau.');
+          return;
+        }
+
+        final userId = response['id'];
+
+        // Lưu thông tin user
+        try {
+          context.read<UserProvider>().setUserData(
+            id: userId,
+            fullName: response['fullName'] ?? '',
+            email: response['email'] ?? '',
+            avatar: response['avatar'] ?? '',
+          );
+
+          // Load pets của user
+          await context.read<PetProvider>().loadPets(userId);
+
+          if (!mounted) return;
+          Navigator.of(context).pushReplacementNamed('/home');
+        } catch (e) {
+          showErrorDialog('Lỗi: Không thể xử lý thông tin user. Vui lòng thử lại sau.');
+        }
       } else {
-        showErrorDialog(t.loginFailed);
+        showErrorDialog(response['message'] ?? t.loginFailed);
       }
     } catch (e) {
-      if (mounted) showErrorDialog(t.loginFailed);
+      if (mounted) showErrorDialog('Lỗi: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
