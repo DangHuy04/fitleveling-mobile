@@ -4,7 +4,11 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import 'pet_screen.dart';
 import 'workout_screen.dart';
+import 'profile_screen.dart';
+import 'settings_screen.dart';
+import 'notification_screen.dart';
 import '../providers/workout_provider.dart';
+import '../providers/notification_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,9 +47,11 @@ class HomeScreenState extends State<HomeScreen> {
 
     // Đặt timer để tắt hiệu ứng nháy sau 150ms
     _blinkTimer = Timer(const Duration(milliseconds: 150), () {
-      setState(() {
-        _isBlinking = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isBlinking = false;
+        });
+      }
     });
   }
 
@@ -57,115 +63,179 @@ class HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home:
-          _token == null
-              ? const Center(child: CircularProgressIndicator())
-              : ChangeNotifierProvider(
-                create: (context) => WorkoutProvider(token: _token!),
-                child: Scaffold(
-                  backgroundColor: Color(0xFF1D1340),
-                  body: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF281B30), Color(0xFF1D1340)],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+    if (_token == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => WorkoutProvider(token: _token!),
+        ),
+        ChangeNotifierProvider(create: (context) => NotificationProvider()),
+      ],
+      child: Scaffold(
+        backgroundColor: const Color(0xFF1D1340),
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF281B30), Color(0xFF1D1340)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ProfileScreen(),
+                            ),
+                          );
+                        },
+                        child: const CircleAvatar(
+                          radius: 24,
+                          backgroundColor: Colors.black,
+                          child: Icon(
+                            FontAwesomeIcons.circleUser,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: SafeArea(
-                      child: Column(
+                      Row(
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: Colors.black,
-                                  child: Icon(
-                                    FontAwesomeIcons.circleUser,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    CircleIcon(
+                          Consumer<NotificationProvider>(
+                            builder: (context, notificationProvider, _) {
+                              final unreadCount =
+                                  notificationProvider.unreadCount;
+                              return Stack(
+                                children: [
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  const NotificationScreen(),
+                                        ),
+                                      );
+                                    },
+                                    child: const CircleIcon(
                                       icon: FontAwesomeIcons.bell,
-                                      color: const Color(0xFFFF9F43),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    CircleIcon(
-                                      icon: FontAwesomeIcons.gear,
                                       color: Color(0xFFFF9F43),
                                     ),
-                                  ],
+                                  ),
+                                  if (unreadCount > 0)
+                                    Positioned(
+                                      right: 0,
+                                      top: 0,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Text(
+                                          unreadCount > 9
+                                              ? '9+'
+                                              : '$unreadCount',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(width: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const SettingsScreen(),
                                 ),
-                              ],
+                              );
+                            },
+                            child: const CircleIcon(
+                              icon: FontAwesomeIcons.gear,
+                              color: Color(0xFFFF9F43),
                             ),
                           ),
-                          Expanded(child: _getScreenForIndex(_selectedIndex)),
                         ],
                       ),
-                    ),
-                  ),
-                  bottomNavigationBar: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 15,
-                    ),
-                    decoration: const BoxDecoration(
-                      color: Colors.black,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 10,
-                          offset: Offset(0, -5),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: List.generate(4, (index) {
-                        List<IconData> icons = [
-                          FontAwesomeIcons.house,
-                          FontAwesomeIcons.dumbbell,
-                          FontAwesomeIcons.users,
-                          FontAwesomeIcons.trophy,
-                        ];
-                        return AnimatedContainer(
-                          duration: const Duration(milliseconds: 100),
-                          decoration: BoxDecoration(
-                            color: Colors.transparent,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          padding: const EdgeInsets.all(5),
-                          child: IconButton(
-                            icon: Icon(
-                              icons[index],
-                              color:
-                                  _selectedIndex == index
-                                      ? _isBlinking && _selectedIndex == index
-                                          ? Colors.white
-                                          : const Color(0xFFFF9F43)
-                                      : Colors.white30,
-                              size: _selectedIndex == index ? 30 : 28,
-                            ),
-                            onPressed: () => _onItemTapped(index),
-                          ),
-                        );
-                      }),
-                    ),
+                    ],
                   ),
                 ),
+                Expanded(child: _getScreenForIndex(_selectedIndex)),
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          decoration: const BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(30),
+              topRight: Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, -5),
               ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: List.generate(4, (index) {
+              List<IconData> icons = [
+                FontAwesomeIcons.house,
+                FontAwesomeIcons.dumbbell,
+                FontAwesomeIcons.users,
+                FontAwesomeIcons.trophy,
+              ];
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 100),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                padding: const EdgeInsets.all(5),
+                child: IconButton(
+                  icon: Icon(
+                    icons[index],
+                    color:
+                        _selectedIndex == index
+                            ? _isBlinking && _selectedIndex == index
+                                ? Colors.white
+                                : const Color(0xFFFF9F43)
+                            : Colors.white30,
+                    size: _selectedIndex == index ? 30 : 28,
+                  ),
+                  onPressed: () => _onItemTapped(index),
+                ),
+              );
+            }),
+          ),
+        ),
+      ),
     );
   }
 

@@ -2,6 +2,7 @@ import 'package:fitleveling/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import '../main.dart';
 import 'package:fitleveling/l10n/app_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -10,7 +11,8 @@ class SignupScreen extends StatefulWidget {
   SignupScreenState createState() => SignupScreenState();
 }
 
-class SignupScreenState extends State<SignupScreen> {
+class SignupScreenState extends State<SignupScreen>
+    with SingleTickerProviderStateMixin {
   final FocusNode fullNameFocusNode = FocusNode();
   final FocusNode emailFocusNode = FocusNode();
   final FocusNode passwordFocusNode = FocusNode();
@@ -25,6 +27,22 @@ class SignupScreenState extends State<SignupScreen> {
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
   bool _acceptTerms = false;
+  
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _slideAnimation = Tween<double>(begin: 50, end: 0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    );
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
@@ -36,6 +54,7 @@ class SignupScreenState extends State<SignupScreen> {
     emailController.dispose();
     passwordController.dispose();
     confirmPasswordController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -98,6 +117,11 @@ class SignupScreenState extends State<SignupScreen> {
               content: Text(t.registerSuccess), 
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              margin: const EdgeInsets.all(10),
             ),
           );
           
@@ -109,7 +133,7 @@ class SignupScreenState extends State<SignupScreen> {
       }
     } 
     catch (e) {
-      if (mounted) showErrorDialog("Dăng ký thất bại: ${e.toString()}");
+      if (mounted) showErrorDialog("Đăng ký thất bại: ${e.toString()}");
     } finally {
       if (mounted) {
         setState(() {
@@ -124,26 +148,45 @@ class SignupScreenState extends State<SignupScreen> {
       context: context,
       builder: (BuildContext context) {
         return Dialog(
-          backgroundColor: const Color.fromARGB(230, 255, 255, 255),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          backgroundColor: const Color(0xFF2C1D56),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          elevation: 10,
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                const Icon(
+                  FontAwesomeIcons.circleExclamation,
+                  color: Colors.red,
+                  size: 50,
+                ),
+                const SizedBox(height: 15),
                 Text(
                   message,
-                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: const Color(0xFFFF9F43),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 10,
+                    ),
                   ),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("OK", style: TextStyle(color: Colors.white)),
+                  child: const Text(
+                    "OK",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -176,14 +219,22 @@ class SignupScreenState extends State<SignupScreen> {
               backgroundColor: Colors.transparent,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                icon: const Icon(
+                  FontAwesomeIcons.arrowLeft,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               actions: [
                 PopupMenuButton<Locale>(
                   icon: const Icon(Icons.language, color: Colors.white),
-                  onSelected: (Locale newLocale) {
-                    MyApp.of(context)?.setLocale(newLocale);
+                  onSelected: (Locale value) {
+                    Locale newLocale = Locale(
+                      value.languageCode,
+                      value.countryCode,
+                    );
+                    MyApp.of(context)?.changeLocale(newLocale);
                   },
                   itemBuilder: (BuildContext context) => [
                     const PopupMenuItem(
@@ -202,253 +253,362 @@ class SignupScreenState extends State<SignupScreen> {
             // Nội dung chính
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-                    Image.asset('assets/logo.png', height: 100),
+                child: AnimatedBuilder(
+                  animation: _slideAnimation,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0, _slideAnimation.value),
+                      child: child,
+                    );
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 10),
+                      Image.asset('assets/logo.png', height: 100),
 
-                    const SizedBox(height: 10),
-                    Text(
-                      t.createNewAccount, 
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            offset: Offset(0, 2),
-                            blurRadius: 6,
-                            color: Colors.black26,
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      Text(
+                        t.createNewAccount,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              offset: Offset(0, 2),
+                              blurRadius: 6,
+                              color: Colors.black26,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: 30),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        children: [
-                          // Trường nhập họ tên
-                          TextField(
-                            controller: fullNameController,
-                            focusNode: fullNameFocusNode,
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.name,
-                            onSubmitted: (_) => FocusScope.of(context).requestFocus(emailFocusNode),
-                            decoration: InputDecoration(
-                              hintText: t.fullName, 
-                              prefixIcon: const Icon(Icons.person, color: Colors.white70),
-                              filled: true,
-                              fillColor: Colors.white10,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: const TextStyle(color: Colors.white70),
-                            ),
-                            style: const TextStyle(color: Colors.white),
+                      const SizedBox(height: 25),
+
+                      // Card chứa form đăng ký
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 20),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF3A236A), Color(0xFF2C1D56)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          const SizedBox(height: 15),
-
-                          // Trường nhập email
-                          TextField(
-                            controller: emailController,
-                            focusNode: emailFocusNode,
-                            textInputAction: TextInputAction.next,
-                            keyboardType: TextInputType.emailAddress,
-                            onSubmitted: (_) => FocusScope.of(context).requestFocus(passwordFocusNode),
-                            decoration: InputDecoration(
-                              hintText: t.email,
-                              prefixIcon: const Icon(Icons.email, color: Colors.white70),
-                              filled: true,
-                              fillColor: Colors.white10,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: const TextStyle(color: Colors.white70),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.3),
+                              spreadRadius: 2,
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
                             ),
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 15),
-
-                          // Trường nhập mật khẩu
-                          TextField(
-                            controller: passwordController,
-                            focusNode: passwordFocusNode,
-                            textInputAction: TextInputAction.next,
-                            obscureText: _obscurePassword,
-                            onSubmitted: (_) => FocusScope.of(context).requestFocus(confirmPasswordFocusNode),
-                            decoration: InputDecoration(
-                              hintText: t.password,
-                              prefixIcon: const Icon(Icons.lock, color: Colors.white70),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(25),
+                        child: Column(
+                          children: [
+                            // Trường nhập họ tên
+                            TextField(
+                              controller: fullNameController,
+                              focusNode: fullNameFocusNode,
+                              textInputAction: TextInputAction.next,
+                              keyboardType: TextInputType.name,
+                              onSubmitted:
+                                  (_) => FocusScope.of(
+                                    context,
+                                  ).requestFocus(emailFocusNode),
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: t.fullName, 
+                                prefixIcon: const Icon(
+                                  FontAwesomeIcons.user,
                                   color: Colors.white70,
+                                  size: 18,
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscurePassword = !_obscurePassword;
-                                  });
-                                },
+                                filled: true,
+                                fillColor: Colors.white.withAlpha(
+                                  (0.1 * 255).round(),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white60,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                  horizontal: 16,
+                                ),
                               ),
-                              filled: true,
-                              fillColor: Colors.white10,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: const TextStyle(color: Colors.white70),
                             ),
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 15),
+                            const SizedBox(height: 15),
 
-                          // Trường nhập xác nhận mật khẩu
-                          TextField(
-                            controller: confirmPasswordController,
-                            focusNode: confirmPasswordFocusNode,
-                            obscureText: _obscureConfirmPassword,
-                            decoration: InputDecoration(
-                              hintText: t.confirmPassword, 
-                              prefixIcon: const Icon(Icons.lock_outline, color: Colors.white70),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                            // Trường nhập email
+                            TextField(
+                              controller: emailController,
+                              focusNode: emailFocusNode,
+                              textInputAction: TextInputAction.next,
+                              keyboardType: TextInputType.emailAddress,
+                              onSubmitted:
+                                  (_) => FocusScope.of(
+                                    context,
+                                  ).requestFocus(passwordFocusNode),
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: t.email,
+                                prefixIcon: const Icon(
+                                  FontAwesomeIcons.envelope,
                                   color: Colors.white70,
+                                  size: 18,
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureConfirmPassword = !_obscureConfirmPassword;
-                                  });
-                                },
+                                filled: true,
+                                fillColor: Colors.white.withAlpha(
+                                  (0.1 * 255).round(),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white60,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                  horizontal: 16,
+                                ),
                               ),
-                              filled: true,
-                              fillColor: Colors.white10,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
-                              hintStyle: const TextStyle(color: Colors.white70),
                             ),
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          const SizedBox(height: 15),
+                            const SizedBox(height: 15),
 
-                          // Checkbox đồng ý điều khoản
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: _acceptTerms,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _acceptTerms = value ?? false;
-                                  });
-                                },
-                                fillColor: WidgetStateProperty.resolveWith(
-                                  (states) => states.contains(WidgetState.selected)
-                                    ? const Color(0xFFFF9F43)
-                                    : Colors.white30,
+                            // Trường nhập mật khẩu
+                            TextField(
+                              controller: passwordController,
+                              focusNode: passwordFocusNode,
+                              textInputAction: TextInputAction.next,
+                              obscureText: _obscurePassword,
+                              onSubmitted:
+                                  (_) => FocusScope.of(
+                                    context,
+                                  ).requestFocus(confirmPasswordFocusNode),
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: t.password,
+                                prefixIcon: const Icon(
+                                  FontAwesomeIcons.lock,
+                                  color: Colors.white70,
+                                  size: 18,
                                 ),
-                              ),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? FontAwesomeIcons.eyeSlash
+                                        : FontAwesomeIcons.eye,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
                                     setState(() {
-                                      _acceptTerms = !_acceptTerms;
+                                      _obscurePassword = !_obscurePassword;
                                     });
                                   },
-                                  child: RichText(
-                                    text: TextSpan(
-                                      text: t.termsAgree, 
-                                      style: const TextStyle(color: Colors.white70),
-                                      children: [
-                                        TextSpan(
-                                          text: t.termsOfService,
+                                ),
+                                filled: true,
+                                fillColor: Colors.white.withAlpha(
+                                  (0.1 * 255).round(),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white60,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                  horizontal: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+
+                            // Trường nhập xác nhận mật khẩu
+                            TextField(
+                              controller: confirmPasswordController,
+                              focusNode: confirmPasswordFocusNode,
+                              obscureText: _obscureConfirmPassword,
+                              style: const TextStyle(color: Colors.white),
+                              decoration: InputDecoration(
+                                hintText: t.confirmPassword, 
+                                prefixIcon: const Icon(
+                                  FontAwesomeIcons.lockOpen,
+                                  color: Colors.white70,
+                                  size: 18,
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword
+                                        ? FontAwesomeIcons.eyeSlash
+                                        : FontAwesomeIcons.eye,
+                                    color: Colors.white70,
+                                    size: 18,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
+                                    });
+                                  },
+                                ),
+                                filled: true,
+                                fillColor: Colors.white.withAlpha(
+                                  (0.1 * 255).round(),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                  borderSide: BorderSide.none,
+                                ),
+                                hintStyle: const TextStyle(
+                                  color: Colors.white60,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 18,
+                                  horizontal: 16,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+
+                            // Checkbox đồng ý điều khoản
+                            Theme(
+                              data: Theme.of(context).copyWith(
+                                checkboxTheme: CheckboxThemeData(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Checkbox(
+                                    value: _acceptTerms,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _acceptTerms = value ?? false;
+                                      });
+                                    },
+                                    activeColor: const Color(0xFFFF9F43),
+                                    checkColor: Colors.white,
+                                  ),
+                                  Expanded(
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _acceptTerms = !_acceptTerms;
+                                        });
+                                      },
+                                      child: RichText(
+                                        text: TextSpan(
+                                          text: t.termsAgree,
                                           style: const TextStyle(
-                                            color: Color(0xFFFF9F43),
+                                            color: Colors.white70,
+                                          ),
+                                          children: [
+                                            TextSpan(
+                                              text: t.termsOfService,
+                                              style: const TextStyle(
+                                                color: Color(0xFFFF9F43),
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            const SizedBox(height: 25),
+
+                            // Nút đăng ký
+                            SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFFFF9F43),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
+                                  elevation: 8,
+                                  shadowColor: const Color(
+                                    0xFFFF9F43,
+                                  ).withOpacity(0.5),
+                                ),
+                                onPressed:
+                                    _isLoading ? null : validateAndSubmit,
+                                child:
+                                    _isLoading
+                                        ? const SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2,
+                                          ),
+                                        )
+                                        : Text(
+                                          t.register,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
                               ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 25),
-
-                          // Nút đăng ký
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFFF9F43),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 40,
-                                vertical: 15,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              minimumSize: const Size(double.infinity, 50),
-                              shadowColor: Colors.orangeAccent,
-                              elevation: 8,
                             ),
-                            onPressed: _isLoading ? null : validateAndSubmit,
-                            child: _isLoading
-                                ? const SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(
-                                    t.register, 
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 25),
+
+                      // Nút chuyển sang Đăng nhập
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Đã có tài khoản? ", // Thay t.alreadyHaveAccount
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 15,
+                            ),
                           ),
-
-                          const SizedBox(height: 20),
-
-                          // Nút chuyển sang Đăng nhập
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Text(
-                                "Đã có tài khoản? ", // Thay t.alreadyHaveAccount
-                                style: TextStyle(color: Colors.white70),
+                          GestureDetector(
+                            onTap: () {
+                              // Quay lại màn hình đăng nhập
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              t.loginNow,
+                              style: const TextStyle(
+                                color: Color(0xFFFF9F43),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  // Quay lại màn hình đăng nhập
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(
-                                  t.loginNow, 
-                                  style: const TextStyle(
-                                    color: Color(0xFFFF9F43),
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
+                      const SizedBox(height: 20),
+                    ],
+                  ),
                 ),
               ),
             ),

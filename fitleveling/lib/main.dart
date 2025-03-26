@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/signup_screen.dart';
 import 'providers/pet_provider.dart';
 import 'providers/user_provider.dart';
+import 'providers/notification_provider.dart';
 import 'l10n/app_localizations.dart';
 
 // Lưu ngôn ngữ vào SharedPreferences
@@ -20,29 +23,67 @@ Future<String?> getSavedLanguage() async {
   return prefs.getString('language');
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  final String? savedLang = await getSavedLanguage();
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => PetProvider()),
-        ChangeNotifierProvider(create: (context) => UserProvider()),
-      ],
-      child: MyApp(initialLocale: Locale(savedLang ?? 'en', '')),
-    ),
-  );
+void main() {
+  runApp(const MyAppSetup());
+}
+
+class MyAppSetup extends StatefulWidget {
+  const MyAppSetup({super.key});
+
+  @override
+  State<MyAppSetup> createState() => _MyAppSetupState();
+}
+
+class _MyAppSetupState extends State<MyAppSetup> {
+  late Future<String?> _savedLangFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _savedLangFuture = _getSavedLanguage();
+  }
+
+  Future<String?> _getSavedLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('language');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<String?>(
+      future: _savedLangFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const MaterialApp(
+            home: Scaffold(body: Center(child: CircularProgressIndicator())),
+          );
+        }
+
+        final savedLang = snapshot.data;
+
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (context) => UserProvider()),
+            ChangeNotifierProvider(create: (context) => PetProvider()),
+            ChangeNotifierProvider(create: (context) => NotificationProvider()),
+          ],
+          child: MyApp(initialLocale: Locale(savedLang ?? 'en', '')),
+        );
+      },
+    );
+  }
 }
 
 class MyApp extends StatefulWidget {
   final Locale initialLocale;
+
   const MyApp({super.key, required this.initialLocale});
 
-  static MyAppState? of(BuildContext context) => context.findAncestorStateOfType<MyAppState>();
+  static MyAppState? of(BuildContext context) =>
+      context.findAncestorStateOfType<MyAppState>();
 
   @override
-  MyAppState createState() => MyAppState();
+  State<MyApp> createState() => MyAppState();
 }
 
 class MyAppState extends State<MyApp> {
@@ -56,11 +97,14 @@ class MyAppState extends State<MyApp> {
     _locale = widget.initialLocale;
   }
 
-  void setLocale(Locale locale) async {
+  Future<void> changeLocale(Locale newLocale) async {
     setState(() {
-      _locale = locale;
+      _locale = newLocale;
     });
-    await saveLanguage(locale.languageCode);
+
+    // Lưu ngôn ngữ đã chọn
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('language', newLocale.languageCode);
   }
 
   @override
@@ -68,17 +112,17 @@ class MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        scaffoldBackgroundColor: const Color(0xFF2A2D3E),
-        textTheme: Theme.of(
-          context,
-        ).textTheme.apply(bodyColor: Colors.white, displayColor: Colors.white),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF6200EE),
+          brightness: Brightness.dark,
+        ),
+        scaffoldBackgroundColor: const Color(0xFF1D1340),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+        ),
       ),
-      supportedLocales: const [
-        Locale('en', ''), // English
-        Locale('vi', ''), // Vietnamese
-      ],
       locale: _locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
@@ -86,10 +130,12 @@ class MyAppState extends State<MyApp> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      supportedLocales: const [Locale('en', ''), Locale('vi', '')],
       initialRoute: '/login',
       routes: {
-        '/login': (context) => const AssetPreloader(child: LoginScreen()),
-        '/home': (context) => const AssetPreloader(child: HomeScreen()),
+        '/login': (context) => const LoginScreen(),
+        '/signup': (context) => const SignupScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }
