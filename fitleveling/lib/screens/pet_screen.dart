@@ -209,6 +209,25 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                 ),
               ),
 
+              // Thêm nút tăng kinh nghiệm
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.fitness_center),
+                label: const Text('Tập luyện (+50 EXP)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                onPressed: () {
+                  _trainPet(context);
+                },
+              ),
+              const SizedBox(height: 10),
+
               // Hiển thị thanh kinh nghiệm
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -648,6 +667,54 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
             ],
           ),
     );
+  }
+
+  // Nút tập luyện để tăng kinh nghiệm cho pet
+  void _trainPet(BuildContext context) async {
+    final petProvider = Provider.of<PetProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final pet = petProvider.activePet;
+    final userId = userProvider.id;
+
+    if (pet == null || userId == null) return;
+
+    try {
+      // Hiển thị loading
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Tăng kinh nghiệm cho pet
+      await petProvider.gainExperience(userId, pet.id, 50);
+
+      // Đóng dialog loading
+      if (mounted) Navigator.of(context).pop();
+
+      // Hiển thị thông báo thành công
+      if (mounted) {
+        final snackBar = SnackBar(
+          content: Text('${pet.name} đã nhận được 50 điểm kinh nghiệm!'),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    } catch (e) {
+      // Đóng dialog loading nếu có lỗi
+      if (mounted) Navigator.of(context).pop();
+
+      // Hiển thị thông báo lỗi
+      if (mounted) {
+        final snackBar = SnackBar(
+          content: Text('Lỗi: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    }
   }
 }
 

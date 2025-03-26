@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../models/pet.dart';
 import '../services/pet_service.dart';
+import '../utils/api_service.dart';
 
 class PetProvider extends ChangeNotifier {
   Pet? _activePet;
   final List<Pet> _pets = [];
   final PetService _petService = PetService();
+  final ApiService _apiService = ApiService();
   bool _isLoading = false;
   String? _error;
 
@@ -24,46 +26,48 @@ class PetProvider extends ChangeNotifier {
   String? get error => _error;
 
   // Getter cho thú cưng hiện tại
-  Pet? get activePet {
-    if (_activePet == null && _cachedActivePet != null) {
-      _activePet = _cachedActivePet;
-    }
-    if (_activePet == null && _pets.isNotEmpty) {
-      _activePet = _pets.first;
-    }
-    return _activePet;
-  }
+  Pet? get activePet => _activePet;
 
   // Getter cho danh sách thú cưng
   List<Pet> get pets => List.unmodifiable(_pets);
 
   // Tải dữ liệu pet từ server
   Future<void> loadPets(String userId) async {
-    try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
 
+    try {
       // Lấy danh sách pet
-      final pets = await _petService.getUserPets(userId);
+      final petsData = await _apiService.fetchPets(userId);
       _pets.clear();
-      _pets.addAll(pets);
+      _pets.addAll(petsData);
 
       // Lấy pet hiện tại
-      final currentPet = await _petService.getCurrentPet(userId);
-      if (currentPet != null) {
-        _activePet = currentPet;
-        _cachedActivePet = currentPet;
-      } else if (_pets.isNotEmpty) {
+      _activePet = _pets.firstWhere(
+        (pet) => pet.isActive,
+        orElse: () => _pets.isNotEmpty ? _pets.first : _pets.first,
+      );
+
+      if (_activePet == null && _pets.isNotEmpty) {
         _activePet = _pets.first;
-        _cachedActivePet = _pets.first;
+        await setActivePet(userId, _activePet!.id);
       }
 
+      _cachedActivePet = _activePet;
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
+      _error = 'Không thể tải thông tin thú cưng: $e';
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Khôi phục pet hiện tại từ cache nếu có
+  void restoreFromCache() {
+    if (_cachedActivePet != null) {
+      _activePet = _cachedActivePet;
       notifyListeners();
     }
   }
@@ -71,24 +75,13 @@ class PetProvider extends ChangeNotifier {
   // Thay đổi thú cưng hiện tại
   Future<void> setActivePet(String userId, String petId) async {
     try {
-      _isLoading = true;
-      _error = null;
-      notifyListeners();
-
-      await _petService.setCurrentPet(userId, petId);
+      await _apiService.setActivePet(userId, petId);
       
-      final pet = _pets.firstWhere(
-        (pet) => pet.id == petId,
-        orElse: () => _pets.first,
-      );
-      _activePet = pet;
-      _cachedActivePet = pet;
-
-      _isLoading = false;
+      await loadPets(userId);
+      
       notifyListeners();
     } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
+      _error = 'Không thể đặt thú cưng hiện tại: $e';
       notifyListeners();
     }
   }
@@ -145,6 +138,61 @@ class PetProvider extends ChangeNotifier {
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Tăng kinh nghiệm cho thú cưng
+  Future<void> gainExperience(String userId, String petId, int amount) async {
+    try {
+      // Tìm pet trong danh sách local
+      final petIndex = _pets.indexWhere((p) => p.id == petId);
+      if (petIndex == -1) throw Exception('Không tìm thấy thú cưng');
+
+      // Lấy thông tin pet hiện tại
+      final pet = _pets[petIndex];
+
+      // Tính toán kinh nghiệm mới
+      final currentExp = pet.experience;
+      final maxExp = 50 * pet.level * pet.evolutionStage;
+      var newExp = currentExp + amount;
+      var newLevel = pet.level;
+      var newEvolutionStage = pet.evolutionStage;
+
+      // Kiểm tra nếu đủ exp để lên level
+      if (newExp >= maxExp) {
+        // Level up
+        newExp = newExp - maxExp;
+        newLevel++;
+
+        // Kiểm tra nếu đủ level để tiến hóa
+        if (newLevel > 5 && newEvolutionStage < pet.maxEvolutionStage) {
+          newLevel = 1;
+          newEvolutionStage++;
+        }
+      }
+
+      // Gọi API để cập nhật dữ liệu
+      final updatedPet = await _apiService.updatePetExperience(
+        userId,
+        petId,
+        newExp,
+        newLevel,
+        newEvolutionStage,
+      );
+
+      // Cập nhật dữ liệu local
+      _pets[petIndex] = updatedPet;
+
+      // Cập nhật active pet nếu cần
+      if (_activePet?.id == petId) {
+        _activePet = updatedPet;
+        _cachedActivePet = updatedPet;
+      }
+
+      notifyListeners();
+    } catch (e) {
+      _error = 'Không thể tăng kinh nghiệm cho thú cưng: $e';
       notifyListeners();
     }
   }

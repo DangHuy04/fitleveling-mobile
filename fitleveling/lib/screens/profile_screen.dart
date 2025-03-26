@@ -556,7 +556,9 @@ class _ProfileScreenState extends State<ProfileScreen>
                               FractionallySizedBox(
                                 widthFactor:
                                     activePet.experience /
-                                    activePet.requiredExperience,
+                                    (50 *
+                                        activePet.level *
+                                        activePet.evolutionStage),
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: const LinearGradient(
@@ -584,7 +586,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'XP: ${activePet.experience}/${activePet.requiredExperience}',
+                          'XP: ${activePet.experience}/${50 * activePet.level * activePet.evolutionStage}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.white.withOpacity(0.7),
