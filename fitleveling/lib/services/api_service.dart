@@ -1,8 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../utils/config.dart';
 
 class ApiService {
-  static const String baseUrl = "http://localhost:5000"; 
+  static String get baseUrl => AppConfig.getApiUrl();
+  
   // Gửi request GET
   Future<dynamic> getData(String endpoint) async {
     final response = await http.get(Uri.parse('$baseUrl/$endpoint'));

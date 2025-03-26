@@ -4,10 +4,12 @@ import '../models/workout.dart';
 import '../models/daily_workout.dart';
 import '../models/workout_result.dart';
 import '../utils/constants.dart';
+import '../utils/config.dart';
 
 class WorkoutService {
   final String token;
   final bool _useLocalData = true; // Sử dụng dữ liệu mẫu thay vì API
+  static String get _apiUrl => AppConfig.getApiUrl();
   
   // Tạo dữ liệu mẫu cục bộ
   final List<Map<String, dynamic>> _sampleWorkouts = [
@@ -88,7 +90,7 @@ class WorkoutService {
 
     try {
       final response = await http.get(
-        Uri.parse('$apiUrl/workouts'),
+        Uri.parse('$_apiUrl/workouts'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -133,7 +135,7 @@ class WorkoutService {
 
     try {
       final response = await http.get(
-        Uri.parse('$apiUrl/daily-workouts'),
+        Uri.parse('$_apiUrl/daily-workouts'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -203,7 +205,7 @@ class WorkoutService {
 
     try {
       final response = await http.post(
-        Uri.parse('$apiUrl/daily-workouts'),
+        Uri.parse('$_apiUrl/daily-workouts'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -284,7 +286,7 @@ class WorkoutService {
 
     try {
       final response = await http.post(
-        Uri.parse('$apiUrl/complete-workout'),
+        Uri.parse('$_apiUrl/complete-workout'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

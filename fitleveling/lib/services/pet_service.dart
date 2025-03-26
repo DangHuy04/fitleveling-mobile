@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/pet.dart';
+import '../utils/config.dart';
 
 class PetService {
-  static const String baseUrl = 'http://localhost:5000'; // Sửa lại URL để khớp với auth service
+  static String get baseUrl => AppConfig.getApiUrl();
 
   // Lấy danh sách pet của user
   Future<List<Pet>> getUserPets(String userId) async {

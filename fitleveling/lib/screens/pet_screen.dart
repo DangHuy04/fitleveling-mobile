@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:lottie/lottie.dart';
+import 'dart:async';
+import 'dart:ui' as ui;
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import '../models/pet.dart';
 import '../providers/pet_provider.dart';
 import '../providers/user_provider.dart';
@@ -12,6 +16,8 @@ final Map<String, PetAnimationType> _assetTypeCache = {};
 final Map<String, Image> _imageCache = {};
 // Cache lưu trữ ImageProvider để duy trì tham chiếu liên tục
 final Map<String, ImageProvider> _imageProviders = {};
+// Cache cho AnimationController để GIF không bị restart khi rebuild
+final Map<String, AnimationController> _gifControllers = {};
 
 class PetScreen extends StatefulWidget {
   const PetScreen({super.key});
@@ -22,6 +28,7 @@ class PetScreen extends StatefulWidget {
 
 class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
+  final Map<String, AnimationController> _petAnimationControllers = {};
 
   @override
   void initState() {
@@ -48,6 +55,17 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
         _imageProviders[pet.gifAsset] = AssetImage(pet.gifAsset);
       }
       precacheImage(_imageProviders[pet.gifAsset]!, context);
+      
+      // Tạo controller cho GIF của pet hiện tại nếu chưa có
+      final gifPath = pet.gifAsset;
+      if (!_petAnimationControllers.containsKey(gifPath)) {
+        _petAnimationControllers[gifPath] = AnimationController(
+          vsync: this,
+          duration: const Duration(
+            milliseconds: 1000,
+          ), // Điều chỉnh tốc độ animation
+        )..repeat();
+      }
     }
   }
 
@@ -79,6 +97,16 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
 
           // Lưu trữ Image widget vào cache
           _imageCache[assetPath] = image;
+          
+          // Tạo controller cho animation
+          if (!_petAnimationControllers.containsKey(assetPath)) {
+            _petAnimationControllers[assetPath] = AnimationController(
+              vsync: this,
+              duration: const Duration(
+                milliseconds: 1000,
+              ), // Điều chỉnh tốc độ animation
+            )..repeat();
+          }
         } catch (e) {
           // Bỏ qua lỗi
         }
@@ -89,6 +117,12 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    
+    // Giải phóng tất cả controller
+    for (var controller in _petAnimationControllers.values) {
+      controller.dispose();
+    }
+    
     super.dispose();
   }
 
@@ -295,7 +329,14 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
       case PetAnimationType.lottie:
         return _buildLottieAnimation(pet);
       case PetAnimationType.gif:
-        return _buildGifAnimation(pet);
+        // Chọn phương pháp phù hợp tùy theo nền tảng
+        if (kIsWeb) {
+          // Web hiển thị GIF tốt, dùng phương pháp đơn giản
+          return _buildWebGifAnimation(pet);
+        } else {
+          // Android cần phương pháp tối ưu hơn
+          return _buildOptimizedGifAnimation(pet);
+        }
       case PetAnimationType.image:
         return _buildStaticImage(pet);
       case PetAnimationType.none:
@@ -318,11 +359,11 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
       },
     );
   }
-
-  // Hiển thị GIF animation
-  Widget _buildGifAnimation(Pet pet) {
+  
+  // Animation GIF đơn giản cho Web
+  Widget _buildWebGifAnimation(Pet pet) {
     final gifPath = pet.gifAsset;
-
+    
     return RepaintBoundary(
       child: Container(
         constraints: BoxConstraints(
@@ -339,24 +380,61 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
             isAntiAlias: true,
             filterQuality: FilterQuality.high,
             fit: BoxFit.contain,
-            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-              if (frame == null) {
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Opacity(opacity: 0.5, child: child),
-                    const CircularProgressIndicator(),
-                  ],
-                );
-              }
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Animation GIF tối ưu cho Android
+  Widget _buildOptimizedGifAnimation(Pet pet) {
+    final gifPath = pet.gifAsset;
+
+    // Lấy hoặc tạo mới controller nếu chưa có
+    if (!_petAnimationControllers.containsKey(gifPath)) {
+      _petAnimationControllers[gifPath] = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 800),
+      )..repeat();
+    }
+
+    final controller = _petAnimationControllers[gifPath]!;
+    if (!controller.isAnimating) {
+      controller.repeat();
+    }
+
+    return RepaintBoundary(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width,
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
+        alignment: Alignment.center,
+        color: Colors.transparent,
+        child: Transform.scale(
+          scale: 1.8, // Giảm từ 2.0 xuống 1.8 để tránh vấn đề hiệu suất
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              // Sử dụng animated opacity để mô phỏng hiệu ứng pulse thay vì GIF
               return AnimatedOpacity(
-                opacity: 1.0,
-                duration: const Duration(milliseconds: 300),
-                child: child,
+                opacity: 0.9 + 0.1 * controller.value,
+                duration: const Duration(milliseconds: 200),
+                child: Image.asset(
+                  gifPath,
+                  gaplessPlayback: true,
+                  isAntiAlias: true,
+                  filterQuality:
+                      FilterQuality
+                          .medium, // Giảm xuống medium để tăng hiệu suất
+                  fit: BoxFit.contain,
+                  cacheWidth: 250, // Tối ưu bộ nhớ cache
+                  cacheHeight: 250, // Tối ưu bộ nhớ cache
+                  errorBuilder: (context, error, stackTrace) {
+                    return _buildFallbackIcon(pet);
+                  },
+                ),
               );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return _buildFallbackIcon(pet);
             },
           ),
         ),
@@ -518,6 +596,7 @@ class _PetScreenState extends State<PetScreen> with TickerProviderStateMixin {
                   Text('GIF: ${petProvider.activePet?.gifAsset}'),
                   Text('Lottie: ${petProvider.activePet?.lottieAsset}'),
                   Text('PNG: ${petProvider.activePet?.imageAsset}'),
+                  Text('Platform: ${kIsWeb ? "Web" : "Mobile"}'),
                   const Divider(),
 
                   Text(

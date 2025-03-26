@@ -1,8 +1,10 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../utils/config.dart';
 
 class AuthService {
-  static const String baseUrl = "http://localhost:5000";
+  // Lấy base URL từ config
+  static String get baseUrl => AppConfig.getApiUrl();
 
   // Đăng nhập
   Future<Map<String, dynamic>> login(String email, String password, String lang) async {
@@ -65,5 +67,4 @@ class AuthService {
       };
     }
   }
-
 }

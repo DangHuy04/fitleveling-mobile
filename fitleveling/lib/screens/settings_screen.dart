@@ -396,9 +396,17 @@ class _SettingsScreenState extends State<SettingsScreen>
               ),
               TextButton(
                 onPressed: () {
+                  // Xóa dữ liệu người dùng
                   userProvider.clearUserData();
+                  
+                  // Đóng dialog
+                  Navigator.pop(context);
+
+                  // Đóng tất cả màn hình và quay về trang đăng nhập
+                  // Dùng context của scaffold (đóng tất cả context con)
                   Navigator.of(
                     context,
+                    rootNavigator: true,
                   ).pushNamedAndRemoveUntil('/login', (route) => false);
                 },
                 child: const Text(
